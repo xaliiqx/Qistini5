@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قسطني</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+/* ═══════════ إعدادات عامة ═══════════ */
+:root{
+  --sky1:#073B5C; --sky2:#0A5480; --sky3:#1276A8; --skyBg:#E5F2FA;
+  --beige:#F4E3CE; --beigeDk:#E5CFA8; --brown1:#6B3D1E; --brown2:#A87040;
+  --white:#FFFFFF; --text:#0B1E2D; --sub:#4A6E88; --border:#C0DCF0;
+  --green:#167A45; --red:#C02828; --orange:#C86010;
+  --sh:0 2px 14px rgba(7,59,92,0.10); --shH:0 8px 28px rgba(7,59,92,0.20);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Tahoma,'Segoe UI',Arial,sans-serif;background:var(--skyBg);color:var(--text);direction:rtl;min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--sky3);border-radius:9px}
+input,select,textarea,button{font-family:inherit}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--sky3)!important}
+a{text-decoration:none}
+.hidden{display:none!important}
+
+/* شعار */
+@keyframes coinSpin{0%{transform:perspective(500px) rotateY(0deg)}100%{transform:perspective(500px) rotateY(360deg)}}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 6px #1276A888)}50%{filter:drop-shadow(0 0 16px #1276A8cc)}}
+.logo{animation:coinSpin 5s linear infinite, glow 3s ease-in-out infinite}
+
+/* واتساب عائم */
+@keyframes wab{0%,100%{transform:scale(1)}50%{transform:scale(1.13)}}
+.wa-float{position:fixed;bottom:22px;left:22px;z-index:999;width:58px;height:58px;background:#25D366;border-radius:999px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px #25D36660}
+.wa-float svg{animation:wab 2.5s ease-in-out infinite}
+
+/* نافبار */
+nav{background:var(--white);border-bottom:1px solid var(--border);box-shadow:0 2px 10px rgba(7,59,92,.08);position:sticky;top:0;z-index:50}
+.nav-inner{max-width:1200px;margin:0 auto;padding:12px 16px}
+.nav-brand{display:flex;align-items:center;gap:12px;margin-bottom:12px;cursor:pointer}
+.nav-brand b{font-weight:900;font-size:21px;color:var(--sky1)}
+.nav-brand span{font-size:11px;color:var(--sub)}
+.nav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 6px;border-radius:12px;border:1.5px solid var(--border);cursor:pointer;font-weight:800;font-size:13px;background:var(--skyBg);color:var(--text);min-height:56px}
+.nav-btn.active{border:none;background:linear-gradient(135deg,var(--sky3),var(--sky1));color:#fff}
+.nav-btn .ic{font-size:19px}
+
+main{max-width:1200px;margin:0 auto;padding:26px 16px 10px}
+
+/* كروت وأزرار */
+.card{background:var(--white);border-radius:16px;border:1px solid var(--border);box-shadow:var(--sh);padding:20px}
+.card.hover:hover{box-shadow:var(--shH);transform:translateY(-3px)}
+.btn{display:inline-flex;align-items:center;gap:7px;justify-content:center;padding:12px 22px;border-radius:11px;font-weight:700;font-size:15px;cursor:pointer;border:none;transition:transform .15s}
+.btn:hover{transform:scale(1.02)}
+.btn-solid{background:linear-gradient(135deg,var(--sky3),var(--sky1));color:#fff}
+.btn-outline{background:transparent;color:var(--sky1);border:1.5px solid var(--sky1)}
+.btn-beige{background:linear-gradient(135deg,var(--beige),var(--beigeDk));color:var(--brown1)}
+.btn-danger{background:#C0282815;color:var(--red);border:1px solid #C0282844}
+.btn-green{background:#167A4518;color:var(--green);border:1px solid #167A4544}
+.btn-wa{background:#25D366;color:#fff}
+.btn-ghost{background:var(--skyBg);color:var(--sky1);border:1px solid var(--border)}
+.btn.sm{padding:8px 14px;font-size:13px}
+input[type=text],input[type=password],input[type=number],input[type=date],select,textarea{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--skyBg);color:var(--text);font-size:15px}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:13px;color:var(--sub);font-weight:700;margin-bottom:6px}
+.badge{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700}
+.badge-sky{color:var(--sky1);background:var(--skyBg)}
+.badge-green{color:var(--green);background:#167A4518}
+.badge-red{color:var(--red);background:#C0282818}
+.badge-orange{color:var(--orange);background:#C8601018}
+.badge-beige{color:var(--brown1);background:var(--beige)}
+.page-title{margin-bottom:22px}
+.page-title h2{font-size:23px;font-weight:900}
+.page-title p{font-size:14px;color:var(--sub);margin-top:6px}
+
+/* الهيرو */
+.hero{background:linear-gradient(135deg,var(--sky1) 0%,var(--sky2) 55%,var(--sky3) 100%);border-radius:18px;margin-bottom:24px;padding:36px 26px;position:relative;overflow:hidden;box-shadow:var(--sh);color:#fff}
+.hero h1{font-size:27px;font-weight:900;margin:12px 0 10px;line-height:1.45}
+.hero p{color:#ffffffbb;font-size:14px;margin-bottom:20px;line-height:1.8;max-width:520px}
+.founder-quote{text-align:center;padding:13px 20px;background:linear-gradient(90deg,var(--beige),var(--beigeDk),var(--beige));border-radius:12px;margin-bottom:24px;font-size:14px;font-weight:700;color:var(--brown1)}
+
+/* منتجات */
+.cats{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.cat-btn{padding:8px 17px;border-radius:999px;border:1.5px solid var(--border);background:var(--white);font-weight:700;font-size:13px;cursor:pointer}
+.cat-btn.active{background:var(--sky1);color:#fff;border-color:var(--sky1)}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.pcard{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;cursor:pointer;box-shadow:var(--sh);transition:all .2s}
+.pcard:hover{transform:translateY(-4px);box-shadow:var(--shH)}
+.pcard img{width:100%;height:150px;object-fit:cover;background:var(--skyBg)}
+.pcard .body{padding:13px 15px}
+.pcard .cat{font-size:11px;color:var(--sub);margin-bottom:3px}
+.pcard .name{font-weight:800;font-size:14px;margin-bottom:9px}
+.pcard .row{display:flex;justify-content:space-between;align-items:center}
+
+/* مودال */
+.modal-overlay{position:fixed;inset:0;background:#00000075;z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--white);border-radius:18px;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 50px rgba(7,59,92,.35)}
+.modal img{width:100%;height:200px;object-fit:cover;border-radius:18px 18px 0 0}
+.modal-close{position:absolute;top:12px;left:12px;background:#000a;border:none;border-radius:999px;width:34px;height:34px;color:#fff;cursor:pointer;font-size:17px}
+.modal-body{padding:22px}
+
+/* واتساب دردشة */
+.wa-chat{background:#111B21;border-radius:16px;overflow:hidden;box-shadow:var(--sh)}
+.wa-head{background:#1F2C34;padding:13px 16px;display:flex;align-items:center;gap:10px}
+.wa-msgs{background:#0A1014;height:300px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.wa-bubble{padding:9px 13px;border-radius:13px 13px 13px 2px;font-size:13px;line-height:1.8;white-space:pre-wrap;max-width:80%;color:#E9EDEF;background:#1F2C34}
+.wa-bubble.me{border-radius:13px 13px 2px 13px;background:#005C4B;margin-right:auto;margin-left:0}
+.wa-input-row{background:#1F2C34;padding:10px 12px;display:flex;gap:8px;align-items:center}
+.wa-input-row input{flex:1;background:#2A3942;border:none;border-radius:999px;padding:9px 14px;color:#E9EDEF;font-size:13px}
+.wa-send{width:38px;height:38px;background:#00A884;border-radius:999px;border:none;cursor:pointer;font-size:16px;color:#fff}
+
+/* أدمن */
+.admin-menu{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.admin-menu button{display:flex;align-items:center;gap:6px;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:13px;white-space:nowrap;flex-shrink:0;background:var(--skyBg);color:var(--text)}
+.admin-menu button.active{background:linear-gradient(135deg,var(--sky3),var(--sky1));color:#fff}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.list-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid var(--border);border-radius:11px;background:var(--skyBg);margin-bottom:8px}
+.list-row img{width:42px;height:42px;border-radius:9px;object-fit:cover;background:var(--beige);flex-shrink:0}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:16px}
+
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px}
+.theme-opt{padding:12px 8px;border-radius:12px;border:1.5px solid var(--border);cursor:pointer;font-weight:700;font-size:12px;background:var(--white)}
+.theme-opt.active{border:2.5px solid var(--sky1)}
+.theme-opt .swatch{width:100%;height:26px;border-radius:7px;margin-bottom:6px}
+
+footer{background:var(--sky1);color:#fff;padding:26px 20px;text-align:center;margin-top:40px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ شريط التنقل ═══════════ -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-brand" onclick="goTab('home')">
+      <svg class="logo" width="46" height="46" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="gSky" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1276A8"/><stop offset="100%" stop-color="#073B5C"/></linearGradient>
+          <linearGradient id="gBeige" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F4E3CE"/><stop offset="100%" stop-color="#A87040"/></linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="48" fill="url(#gSky)"/>
+        <circle cx="50" cy="50" r="44" fill="none" stroke="url(#gBeige)" stroke-width="2" stroke-dasharray="7 4"/>
+        <path d="M34 38 Q34 24 50 24 Q66 24 66 38 L66 55 Q66 70 50 70 Q41 70 37 64" fill="none" stroke="url(#gBeige)" stroke-width="7" stroke-linecap="round"/>
+        <path d="M37 64 Q30 74 24 72" fill="none" stroke="url(#gBeige)" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="50" cy="47" r="5" fill="url(#gBeige)"/>
+        <line x1="36" y1="82" x2="64" y2="82" stroke="url(#gBeige)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="40" y1="88" x2="60" y2="88" stroke="url(#gBeige)" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 3"/>
+      </svg>
+      <div><b id="brandName">قسطني</b><br><span id="brandSub">شركة قسطني للتسويق والتقسيط</span></div>
+    </div>
+    <div class="nav-grid">
+      <button class="nav-btn" data-tab="home" onclick="goTab('home')"><span class="ic">🏠</span>الرئيسية</button>
+      <button class="nav-btn" data-tab="calc" onclick="goTab('calc')"><span class="ic">🧮</span>احسب قسطك</button>
+      <button class="nav-btn" data-tab="lookup" onclick="goTab('lookup')"><span class="ic">🔍</span>أقساطي</button>
+      <button class="nav-btn" data-tab="financing" onclick="goTab('financing')"><span class="ic">💳</span>طلب تمويل</button>
+      <button class="nav-btn" data-tab="wa" onclick="goTab('wa')"><span class="ic">💬</span>واتساب</button>
+      <button class="nav-btn" data-tab="admin" onclick="goTab('admin')"><span class="ic">⚙️</span>الإدارة</button>
+    </div>
+  </div>
+</nav>
+
+<main id="main"></main>
+
+<footer>
+  <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:8px">
+    <svg width="34" height="34" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#1276A8"/><path d="M34 38 Q34 24 50 24 Q66 24 66 38 L66 55 Q66 70 50 70 Q41 70 37 64" fill="none" stroke="#F4E3CE" stroke-width="7" stroke-linecap="round"/></svg>
+    <b style="font-size:18px">قسطني</b>
+  </div>
+  <div id="footerName" style="font-size:13px;opacity:.8;margin-bottom:5px"></div>
+  <div style="font-size:13px;font-style:italic;opacity:.9;margin-bottom:8px">"نحن هنا بخدمتكم ولمساعدتكم شرفتونا"</div>
+  <a id="footerWA" href="#" target="_blank" style="color:#25D366;font-weight:700;font-size:13px">📱 واتساب</a>
+  <div style="font-size:11px;opacity:.4;margin-top:8px">© 2026 جميع الحقوق محفوظة</div>
+</footer>
+
+<a class="wa-float" id="waFloatBtn" href="#" target="_blank">
+  <svg width="30" height="30" viewBox="0 0 32 32" fill="#fff"><path d="M16 2C8.27 2 2 8.27 2 16c0 2.4.63 4.65 1.72 6.6L2 30l7.61-1.7A13.94 13.94 0 0016 30c7.73 0 14-6.27 14-14S23.73 2 16 2zm6.34 19.46c-.35-.17-2.06-1.02-2.38-1.13-.32-.12-.55-.17-.78.17-.23.35-.9 1.13-1.1 1.36-.2.23-.4.26-.75.09-.35-.17-1.47-.54-2.8-1.73-1.03-.92-1.73-2.06-1.93-2.41-.2-.35-.02-.54.15-.71.16-.16.35-.41.52-.61.17-.2.23-.35.35-.58.12-.23.06-.44-.03-.61-.09-.17-.78-1.89-1.07-2.59-.28-.68-.57-.59-.78-.6-.2-.01-.44-.01-.67-.01s-.61.09-.93.43c-.32.35-1.22 1.19-1.22 2.9s1.25 3.37 1.42 3.6c.17.23 2.45 3.75 5.95 5.25.83.36 1.48.57 1.99.73.84.26 1.59.23 2.19.14.67-.1 2.06-.84 2.35-1.66.29-.81.29-1.51.2-1.66-.09-.14-.32-.23-.67-.4z"/></svg>
+</a>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   ⚠️ إعداد Firebase — الزم تسوي هذا قبل الاستخدام الحقيقي:
+   1) روح https://console.firebase.google.com وسوي مشروع جديد (مجاني)
+   2) فعّل Firestore Database (ابدأ بوضع Test mode)
+   3) من إعدادات المشروع > عام > انسخ "Firebase SDK snippet" (Config)
+   4) الصگ القيم مكان الأمثلة تحت بين علامتي "" فقط
+   بدون هذي الخطوة التطبيق يشتغل محلياً بالمتصفح فقط (localStorage)
+   بدون حفظ دائم مشترك بين الأجهزة.
+   ═══════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBLNBKKyEKcjOvHtx0M4uW8bfinHOsb584",
+  authDomain: "qistini5.firebaseapp.com",
+  projectId: "qistini5",
+  storageBucket: "qistini5.firebasestorage.app",
+  messagingSenderId: "470899173891",
+  appId: "1:470899173891:web:569a6b6640aa454ea0bc36"
+};
+
+let db = null;
+let useFirebase = false;
+try {
+  if (firebaseConfig.apiKey !== "ضع_مفتاحك_هنا") {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    useFirebase = true;
+  }
+} catch(e) { console.warn("Firebase غير مُعد بعد، سيتم استخدام التخزين المحلي:", e); }
+
+const WA_NUM = "9647749379844";
+const ADMIN_PASS = "847291";
+const FOUNDER = "نحن هنا بخدمتكم ولمساعدتكم شرفتونا";
+
+const HUE_PRESETS = [
+  { id:"sky", label:"سمائي (افتراضي)", deg:0 },
+  { id:"green", label:"أخضر", deg:130 },
+  { id:"purple", label:"بنفسجي", deg:250 },
+  { id:"pink", label:"وردي", deg:300 },
+  { id:"orange", label:"برتقالي", deg:35 },
+];
+const BG_PRESETS = [
+  { id:"sky", label:"سمائي فاتح", color:"#E5F2FA" },
+  { id:"beige", label:"بيج دافئ", color:"#F7EFE1" },
+  { id:"white", label:"أبيض نقي", color:"#FAFAFA" },
+  { id:"mint", label:"نعناعي", color:"#E8F5EE" },
+];
+
+/* ─── الحالة (State) ─── */
+let state = {
+  products: [
+    {id:"p1", name:"ثلاجة LG انفرتر 18 قدم", cat:"أجهزة منزلية", price:850000, img:"https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80", desc:"انفرتر موفر للكهرباء، ضمان وكيل 3 سنوات."},
+    {id:"p2", name:"تلفزيون سوني 55 بوصة 4K", cat:"إلكترونيات", price:950000, img:"https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=500&q=80", desc:"شاشة 4K مع أندرويد TV وصوت ممتاز."},
+    {id:"p3", name:"موبايل سامسونج S24", cat:"موبايلات", price:1100000, img:"https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&q=80", desc:"ذاكرة 256GB، كاميرا احترافية، ضمان رسمي."},
+    {id:"p4", name:"مكيف سبليت 24000 وحدة", cat:"أجهزة منزلية", price:700000, img:"https://images.unsplash.com/photo-1631545806609-947ba4204bb5?w=500&q=80", desc:"انفرتر بارد/حار، موفر طاقة، تركيب مجاني."},
+    {id:"p5", name:"لابتوب HP Core i7", cat:"إلكترونيات", price:980000, img:"https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&q=80", desc:"معالج i7 جيل 13 للعمل والدراسة."},
+    {id:"p6", name:"غسالة سامسونج 9 كغم", cat:"أجهزة منزلية", price:620000, img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80", desc:"فتحة أمامية، برامج ذكية، ضمان 5 سنوات."},
+  ],
+  partners: [
+    {id:"c1", name:"مجموعة الرافدين التجارية", field:"أجهزة منزلية"},
+    {id:"c2", name:"معرض النخبة للموبايلات", field:"هواتف ذكية"},
+    {id:"c3", name:"شركة الأمين للأثاث", field:"أثاث وديكور"},
+  ],
+  subs: [
+    {id:"s1", code:"QST-1042", name:"أحمد كريم عبدالله", wa:"07701234567", product:"ثلاجة LG انفرتر 18 قدم", total:920000, months:6, paid:460000, next:"2026-07-01"},
+    {id:"s2", code:"QST-1058", name:"زينب محمد علي", wa:"07809876543", product:"موبايل سامسونج S24", total:1320000, months:9, paid:440000, next:"2026-07-15"},
+  ],
+  markup: {3:8, 6:14, 9:20, 12:27},
+  financing: [
+    {id:"f1", name:"علي حسين جواد", wa:"07712345678", item:"غسالة سامسونج 9 كغم", price:620000, loc:"بغداد - الكرادة", status:"pending", reason:""},
+  ],
+  info: { name:"شركة قسطني للتسويق والتقسيط", about:"قسطني متخصصة ببيع الأجهزة المنزلية والإلكترونيات نقداً وبالتقسيط المريح.", address:"بغداد - شارع فلسطين" },
+  hue: 0,
+  bg: "#E5F2FA",
+};
+
+let currentTab = "home";
+let authed = false;
+let homeCat = "الكل";
+let modalProduct = null;
+let waChat = [{from:"user", text:"السلام عليكم"}, {from:"bot", text: autoReplyText()}];
+let adminSec = "dash";
+let editingProductId = null, editingSubId = null;
+let financingReasons = {};
+let msgSelSubId = "";
+
+/* ─── تخزين: Firebase أو localStorage ─── */
+function saveState(){
+  localStorage.setItem("qistini_state", JSON.stringify(state));
+  if (useFirebase) {
+    db.collection("qistini").doc("main").set(state).catch(e=>console.warn("Firestore save error", e));
+  }
+}
+function loadState(cb){
+  if (useFirebase) {
+    db.collection("qistini").doc("main").get().then(doc=>{
+      if (doc.exists) { state = Object.assign(state, doc.data()); }
+      else { saveState(); }
+      cb();
+    }).catch(e=>{ console.warn("Firestore load error, using local:", e); loadLocal(); cb(); });
+  } else {
+    loadLocal(); cb();
+  }
+}
+function loadLocal(){
+  const raw = localStorage.getItem("qistini_state");
+  if (raw) { try { state = Object.assign(state, JSON.parse(raw)); } catch(e){} }
+}
+
+/* ─── أدوات ─── */
+function fmt(n){ return Math.round(n||0).toLocaleString("ar-IQ") + " د.ع"; }
+function waHref(num, txt){ return `https://wa.me/964${String(num).replace(/^0/,"")}?text=${encodeURIComponent(txt)}`; }
+function autoReplyText(){ return `أهلاً وسهلاً بيك بـ ${state?.info?.name || "شركة قسطني"} 🌟\nسيجيبك الموظف المختص بعد قليل.\nشكراً على انتظارك 🙏`; }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function daysUntil(dateStr){ if(!dateStr) return null; const d1=new Date(todayISO()), d2=new Date(dateStr); return Math.round((d2-d1)/86400000); }
+function esc(s){ return String(s||"").replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ─── تطبيق الثيم ─── */
+function applyTheme(){
+  document.body.style.filter = `hue-rotate(${state.hue}deg)`;
+  document.documentElement.style.setProperty("--skyBg", state.bg);
+  document.body.style.background = state.bg;
+}
+
+/* ─── تحديث الهيدر/فوتر ─── */
+function renderChrome(){
+  document.getElementById("brandName").textContent = "قسطني";
+  document.getElementById("brandSub").textContent = state.info.name;
+  document.getElementById("footerName").textContent = state.info.name;
+  const wa = `https://wa.me/${WA_NUM}`;
+  document.getElementById("footerWA").href = wa;
+  document.getElementById("footerWA").textContent = "📱 واتساب: " + WA_NUM.replace("964","0");
+  document.getElementById("waFloatBtn").href = wa;
+  document.querySelectorAll(".nav-btn").forEach(b=>{
+    b.classList.toggle("active", b.dataset.tab === currentTab);
+  });
+}
+
+/* ─── التنقل ─── */
+function goTab(t){ currentTab = t; render(); window.scrollTo(0,0); }
+
+/* ═══════════ الصفحة الرئيسية ═══════════ */
+function renderHome(){
+  const cats = ["الكل", ...new Set(state.products.map(p=>p.cat))];
+  const list = homeCat === "الكل" ? state.products : state.products.filter(p=>p.cat===homeCat);
+  return `
+    <div class="hero">
+      <span class="badge badge-beige">🌟 التقسيط الأمثل في العراق</span>
+      <h1>قسّط احتياجك اليوم<br>وادفع براحتك</h1>
+      <p>${esc(state.info.about)}</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-beige" onclick="goTab('financing')">💳 اطلب تمويل سلعتك</button>
+        <button class="btn btn-outline" style="border-color:#ffffff44;color:#fff;background:#ffffff18" onclick="goTab('lookup')">🔍 تابع أقساطي</button>
+      </div>
+    </div>
+    <div class="founder-quote">✨ "${FOUNDER}"</div>
+    ${state.partners.length ? `
+    <div class="card" style="margin-bottom:24px">
+      <div style="font-weight:800;margin-bottom:12px;color:var(--sky1)">🤝 شركات نتعامل معها بالتقسيط</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        ${state.partners.map(p=>`<div style="background:var(--skyBg);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:13px"><b style="color:var(--sky1)">${esc(p.name)}</b> — <span style="color:var(--sub)">${esc(p.field)}</span></div>`).join("")}
+      </div>
+    </div>` : ""}
+    <div class="cats">
+      ${cats.map(c=>`<button class="cat-btn ${homeCat===c?'active':''}" onclick="setHomeCat('${esc(c)}')">${esc(c)}</button>`).join("")}
+    </div>
+    <div class="products-grid">
+      ${list.map(p=>`
+        <div class="pcard" onclick="openProductModal('${p.id}')">
+          <img src="${esc(p.img)}" alt="${esc(p.name)}">
+          <div class="body">
+            <div class="cat">${esc(p.cat)}</div>
+            <div class="name">${esc(p.name)}</div>
+            <div class="row">
+              <span class="badge badge-green">💵 نقداً ${fmt(p.price)}</span>
+              <span style="color:var(--sky2);font-size:12px;font-weight:700">التفاصيل ←</span>
+            </div>
+          </div>
+        </div>`).join("")}
+    </div>
+    ${modalProduct ? renderProductModal() : ""}
+  `;
+}
+function setHomeCat(c){ homeCat = c; render(); }
+function openProductModal(id){ modalProduct = state.products.find(p=>p.id===id); render(); }
+function closeProductModal(){ modalProduct = null; render(); }
+function renderProductModal(){
+  const p = modalProduct;
+  const plans = [3,6,9,12].map(m=>{
+    const pct = state.markup[m]||0;
+    const tot = p.price*(1+pct/100);
+    return {m, tot, mo: tot/m, pct};
+  });
+  return `
+  <div class="modal-overlay" onclick="closeProductModal()">
+    <div class="modal" onclick="event.stopPropagation()" style="position:relative">
+      <img src="${esc(p.img)}">
+      <button class="modal-close" onclick="closeProductModal()">✕</button>
+      <div class="modal-body">
+        <div style="font-size:11px;color:var(--sub)">${esc(p.cat)}</div>
+        <h2 style="font-size:19px;font-weight:900;margin:5px 0 8px">${esc(p.name)}</h2>
+        <p style="color:var(--sub);line-height:1.8;font-size:13px;margin-bottom:16px">${esc(p.desc)}</p>
+        <div style="background:var(--skyBg);border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+          <span style="color:var(--sub)">السعر نقداً</span>
+          <span style="color:var(--sky1);font-weight:900;font-size:20px">${fmt(p.price)}</span>
+        </div>
+        <div style="font-weight:800;margin-bottom:10px">خطط التقسيط المتاحة:</div>
+        <div style="display:grid;gap:8px">
+          ${plans.map(pl=>`
+            <div style="display:flex;justify-content:space-between;align-items:center;background:var(--skyBg);border-radius:11px;padding:11px 15px;border:1px solid var(--border)">
+              <div>
+                <div style="font-weight:800;font-size:14px">${pl.m} أشهر <span style="color:var(--sub);font-weight:400;font-size:12px">(${pl.pct}% زيادة)</span></div>
+                <div style="font-size:11px;color:var(--sub)">الإجمالي: ${fmt(pl.tot)}</div>
+              </div>
+              <span class="badge badge-sky">💰 ${fmt(pl.mo)}/شهر</span>
+            </div>`).join("")}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════ حاسبة الأقساط ═══════════ */
+function renderCalc(){
+  return `
+    <div style="max-width:620px;margin:0 auto">
+      <div class="page-title"><h2>🧮 احسب سعر الأقساط</h2><p>أدخل السعر النقدي لمعرفة خطط التقسيط الأربع فوراً</p></div>
+      <div class="card">
+        <div class="fld"><label>السعر النقدي للسلعة (د.ع)</label>
+          <input type="text" id="calcPrice" placeholder="مثال: 850000" oninput="renderCalcResult()">
+        </div>
+        <div id="calcResult"></div>
+      </div>
+    </div>`;
+}
+function renderCalcResult(){
+  const raw = document.getElementById("calcPrice").value.replace(/\D/g,"");
+  const n = Number(raw)||0;
+  const box = document.getElementById("calcResult");
+  if (n<=0){ box.innerHTML=""; return; }
+  const plans = [3,6,9,12].map(m=>{ const pct=state.markup[m]||0; const tot=n*(1+pct/100); return {m, tot, mo: tot/m, pct}; });
+  box.innerHTML = `
+    <div style="background:var(--skyBg);border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between">
+      <span style="color:var(--sub)">السعر النقدي</span><span style="color:var(--green);font-weight:900;font-size:18px">${fmt(n)}</span>
+    </div>
+    <div style="display:grid;gap:9px">
+      ${plans.map(pl=>`
+        <div style="background:var(--white);border:1.5px solid var(--border);border-radius:13px;padding:13px 17px;display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-weight:800;font-size:15px;color:var(--sky1)">${pl.m} أشهر</div>
+          <div style="font-size:12px;color:var(--sub);margin-top:3px">إجمالي: ${fmt(pl.tot)} | زيادة ${pl.pct}%</div></div>
+          <div style="text-align:left"><div style="font-weight:900;font-size:17px">${fmt(pl.mo)}</div><div style="font-size:11px;color:var(--sub)">شهرياً</div></div>
+        </div>`).join("")}
+    </div>`;
+}
+
+/* ═══════════ أقساطي ═══════════ */
+function renderLookup(){
+  return `
+    <div style="max-width:560px;margin:0 auto">
+      <div class="page-title"><h2>🔍 متابعة أقساطي</h2><p>ادخل بياناتك لمعرفة تفاصيل أقساطك</p></div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="fld"><label>الاسم الكامل</label><input type="text" id="lkName" placeholder="مثال: أحمد كريم عبدالله"></div>
+        <div class="fld"><label>رقم الواتساب</label><input type="text" id="lkWa" placeholder="07xxxxxxxxx"></div>
+        <div class="fld"><label>الكود الخاص</label><input type="text" id="lkCode" placeholder="مثال: QST-1042"></div>
+        <button class="btn btn-solid" style="width:100%" onclick="doLookup()">🔍 عرض تفاصيل القسط</button>
+        <div id="lkErr"></div>
+      </div>
+      <div id="lkResult"></div>
+      <div style="font-size:12px;color:var(--sub);text-align:center;margin-top:8px">تجربة: الاسم "أحمد كريم عبدالله" — الكود "QST-1042"</div>
+    </div>`;
+}
+function doLookup(){
+  const name = document.getElementById("lkName").value.trim();
+  const code = document.getElementById("lkCode").value.trim().toLowerCase();
+  const errBox = document.getElementById("lkErr");
+  const resBox = document.getElementById("lkResult");
+  errBox.innerHTML=""; resBox.innerHTML="";
+  const s = state.subs.find(x=>x.code.toLowerCase()===code);
+  if (!s){ errBox.innerHTML = `<div style="color:var(--red);margin-top:10px;font-size:13px;padding:9px 13px;background:#C0282810;border-radius:9px">⚠️ الكود غير موجود. تأكد وحاول مجدداً.</div>`; return; }
+  if (s.name.trim() !== name){ errBox.innerHTML = `<div style="color:var(--red);margin-top:10px;font-size:13px;padding:9px 13px;background:#C0282810;border-radius:9px">⚠️ الاسم لا يطابق بيانات هذا الكود.</div>`; return; }
+  const rem = s.total-s.paid, pct = Math.min(100, Math.round(s.paid/s.total*100)), ml = Math.round(rem/s.total*s.months);
+  resBox.innerHTML = `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div><div style="font-weight:900;font-size:17px">${esc(s.name)}</div>
+        <div style="color:var(--sub);font-size:13px;margin-top:3px">📦 ${esc(s.product)} | كود: <b style="color:var(--sky1)">${esc(s.code)}</b></div></div>
+        <span class="badge badge-sky">⏱ ${s.months} أشهر</span>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:5px"><span>نسبة السداد</span><span style="font-weight:700;color:var(--sky1)">${pct}%</span></div>
+        <div style="background:var(--skyBg);height:9px;border-radius:99px;overflow:hidden"><div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--sky3),var(--sky1))"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+        <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">الإجمالي</div><div style="font-weight:900;font-size:17px">${fmt(s.total)}</div></div>
+        <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">المدفوع</div><div style="font-weight:900;font-size:17px;color:var(--green)">${fmt(s.paid)}</div></div>
+        <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">المتبقي</div><div style="font-weight:900;font-size:17px;color:var(--red)">${fmt(rem)}</div></div>
+        <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">الأشهر المتبقية</div><div style="font-weight:900;font-size:17px;color:var(--orange)">${ml} شهر</div></div>
+      </div>
+      <div style="margin-top:12px;font-size:13px;color:var(--sub);display:flex;gap:6px;align-items:center;padding:9px 13px;background:var(--skyBg);border-radius:9px">📅 تاريخ الاستحقاق القادم: <b style="color:var(--sky1)">${esc(s.next)}</b></div>
+    </div>`;
+}
+
+/* ═══════════ طلب تمويل ═══════════ */
+function renderFinancing(){
+  return `
+    <div style="max-width:560px;margin:0 auto" id="financingWrap">
+      <div class="page-title"><h2>💳 طلب تمويل سلعة</h2><p>أكتب بيانات السلعة وستصل للإدارة فوراً</p></div>
+      <div class="card">
+        <div class="fld"><label>الاسم الكامل</label><input type="text" id="fName"></div>
+        <div class="fld"><label>رقم الواتساب</label><input type="text" id="fWa" placeholder="07xxxxxxxxx"></div>
+        <div class="fld"><label>السلعة المطلوبة</label><input type="text" id="fItem"></div>
+        <div class="fld"><label>سعر السلعة (د.ع)</label><input type="text" id="fPrice"></div>
+        <div class="fld"><label>موقع المعرض / الشركة</label><input type="text" id="fLoc" placeholder="مثال: بغداد — الكرادة"></div>
+        <button class="btn btn-solid" style="width:100%" onclick="submitFinancing()">📤 إرسال الطلب للإدارة</button>
+      </div>
+    </div>`;
+}
+function submitFinancing(){
+  const name=document.getElementById("fName").value.trim();
+  const wa=document.getElementById("fWa").value.trim();
+  const item=document.getElementById("fItem").value.trim();
+  const price=Number(document.getElementById("fPrice").value.replace(/\D/g,""));
+  const loc=document.getElementById("fLoc").value.trim();
+  if(!name||!wa||!item||!price||!loc) return;
+  state.financing.unshift({id:"f"+Date.now(), name, wa, item, price, loc, status:"pending", reason:""});
+  saveState();
+  document.getElementById("financingWrap").innerHTML = `
+    <div class="card" style="padding:34px;text-align:center">
+      <div style="font-size:52px;margin-bottom:12px">✅</div>
+      <h3 style="font-size:18px;font-weight:900;margin-bottom:8px">تم إرسال طلبك بنجاح!</h3>
+      <p style="color:var(--sub);line-height:1.8;font-size:14px;margin-bottom:20px">وصل طلبك للإدارة. سيتواصلون معك على واتساب <b>${esc(wa)}</b> بالقبول أو الرفض.</p>
+      <button class="btn btn-outline" onclick="goTab('financing')">إرسال طلب آخر</button>
+    </div>`;
+}
+
+/* ═══════════ صفحة واتساب ═══════════ */
+function renderWA(){
+  setTimeout(()=>{ const box=document.getElementById("waMsgs"); if(box) box.scrollTop = box.scrollHeight; }, 0);
+  return `
+    <div class="page-title"><h2>💬 محاكاة واتساب</h2><p>رقم الشركة: ${WA_NUM.replace("964","0")} — كل رسالة تحصل على رد تلقائي فوري</p></div>
+    <div style="display:grid;gap:18px">
+      <div class="wa-chat">
+        <div class="wa-head">
+          <svg class="logo" width="36" height="36" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#1276A8"/><path d="M34 38 Q34 24 50 24 Q66 24 66 38 L66 55 Q66 70 50 70 Q41 70 37 64" fill="none" stroke="#F4E3CE" stroke-width="7" stroke-linecap="round"/></svg>
+          <div><div style="color:#fff;font-weight:800;font-size:14px">${esc(state.info.name)}</div><div style="color:#8C9DA6;font-size:11px">● يرد تلقائياً على كل رسالة</div></div>
+        </div>
+        <div class="wa-msgs" id="waMsgs">
+          ${waChat.map(m=>`<div style="display:flex;justify-content:${m.from==='user'?'flex-end':'flex-start'}"><div class="wa-bubble ${m.from==='user'?'me':''}">${esc(m.text)}</div></div>`).join("")}
+        </div>
+        <div class="wa-input-row">
+          <input type="text" id="waMsgInput" placeholder="اكتب رسالة..." onkeydown="if(event.key==='Enter')sendWaMsg()">
+          <button class="wa-send" onclick="sendWaMsg()">➤</button>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-weight:800;margin-bottom:10px;font-size:15px">🤖 نص الرد التلقائي</div>
+        <div style="background:var(--skyBg);border:1px solid var(--border);border-radius:11px;padding:14px;font-size:13px;line-height:2;white-space:pre-wrap;margin-bottom:16px">${esc(autoReplyText())}</div>
+        <a class="btn btn-wa" href="https://wa.me/${WA_NUM}" target="_blank" style="margin-bottom:14px">📱 فتح واتساب الشركة</a>
+        <div style="font-size:12px;color:var(--sub);line-height:1.8;padding:10px 13px;background:#C8601010;border-radius:10px;border:1px solid #C8601022">
+          💡 رسائل التذكير والتحذير تُرسل من لوحة الإدارة ← قسم "إرسال الرسائل" حسب تاريخ الاستحقاق.
+        </div>
+      </div>
+    </div>`;
+}
+function sendWaMsg(){
+  const inp = document.getElementById("waMsgInput");
+  if(!inp.value.trim()) return;
+  waChat.push({from:"user", text:inp.value});
+  waChat.push({from:"bot", text:autoReplyText()});
+  inp.value="";
+  render();
+}
+
+/* ═══════════ دخول الإدارة ═══════════ */
+function renderAdminLogin(){
+  return `
+    <div style="max-width:400px;margin:60px auto">
+      <div class="card" style="padding:34px;text-align:center">
+        <div style="font-size:48px;margin-bottom:12px">🔐</div>
+        <h3 style="font-size:18px;font-weight:900;margin-bottom:6px">دخول لوحة الإدارة</h3>
+        <p style="color:var(--sub);font-size:13px;margin-bottom:20px">هذه المنطقة خاصة بإدارة الشركة فقط</p>
+        <input type="password" id="adminPass" placeholder="● ● ● ● ● ●" style="text-align:center;font-size:20px;letter-spacing:6px" onkeydown="if(event.key==='Enter')doAdminLogin()">
+        <div id="adminErr"></div>
+        <button class="btn btn-solid" style="width:100%;margin-top:14px" onclick="doAdminLogin()">دخول</button>
+      </div>
+    </div>`;
+}
+function doAdminLogin(){
+  const p = document.getElementById("adminPass").value;
+  if (p === ADMIN_PASS){ authed = true; adminSec="dash"; render(); }
+  else {
+    document.getElementById("adminErr").innerHTML = `<div style="color:var(--red);font-size:13px;margin-top:8px">كلمة المرور غير صحيحة</div>`;
+  }
+}
+
+/* ═══════════ لوحة الإدارة ═══════════ */
+const ADMIN_MENU = [
+  {id:"dash", e:"📊", l:"نظرة عامة"},
+  {id:"products", e:"📦", l:"المنتجات"},
+  {id:"subs", e:"👥", l:"المشتركون"},
+  {id:"msgs", e:"📨", l:"إرسال الرسائل"},
+  {id:"financing", e:"💳", l:"طلبات التمويل"},
+  {id:"partners", e:"🤝", l:"الشركاء"},
+  {id:"pricing", e:"💹", l:"نسب التقسيط"},
+  {id:"info", e:"🏢", l:"معلومات الشركة"},
+  {id:"settings", e:"🎨", l:"الألوان والخلفية"},
+];
+function renderAdmin(){
+  return `
+    <div class="card" style="padding:10px;margin-bottom:16px">
+      <div class="admin-menu">
+        ${ADMIN_MENU.map(it=>`<button class="${adminSec===it.id?'active':''}" onclick="setAdminSec('${it.id}')">${it.e} ${it.l}</button>`).join("")}
+        <button style="background:#C0282812;color:var(--red)" onclick="adminLogout()">🚪 خروج</button>
+      </div>
+    </div>
+    <div id="adminContent">${renderAdminSection()}</div>`;
+}
+function setAdminSec(s){ adminSec=s; render(); }
+function adminLogout(){ authed=false; goTab("admin"); }
+function renderAdminSection(){
+  switch(adminSec){
+    case "dash": return renderADash();
+    case "products": return renderAProducts();
+    case "subs": return renderASubs();
+    case "msgs": return renderAMsgs();
+    case "financing": return renderAFinancing();
+    case "partners": return renderAPartners();
+    case "pricing": return renderAPricing();
+    case "info": return renderAInfo();
+    case "settings": return renderASettings();
+    default: return "";
+  }
+}
+
+function renderADash(){
+  const due = state.subs.reduce((a,s)=>a+(s.total-s.paid),0);
+  const pend = state.financing.filter(f=>f.status==="pending").length;
+  const items = [
+    {e:"📦",l:"المنتجات",v:state.products.length,c:"var(--sky1)"},
+    {e:"👥",l:"المشتركون",v:state.subs.length,c:"var(--sky1)"},
+    {e:"💰",l:"قيد التحصيل",v:fmt(due),c:"var(--orange)"},
+    {e:"💳",l:"طلبات الانتظار",v:pend,c:pend>0?"var(--red)":"var(--green)"},
+    {e:"🤝",l:"الشركاء",v:state.partners.length,c:"var(--sky1)"},
+  ];
+  return `<div class="dash-grid">${items.map(x=>`
+    <div class="card hover"><div style="font-size:26px;margin-bottom:6px">${x.e}</div><div style="font-size:12px;color:var(--sub);margin-bottom:4px">${x.l}</div><div style="font-weight:900;font-size:20px;color:${x.c}">${x.v}</div></div>
+  `).join("")}</div>`;
+}
+
+function renderAProducts(){
+  const editing = state.products.find(p=>p.id===editingProductId);
+  return `
+    <div style="display:grid;gap:16px">
+      <div class="card">
+        <div style="font-weight:800;margin-bottom:14px;font-size:15px">${editing?"✏️ تعديل منتج":"➕ إضافة منتج"}</div>
+        <div class="grid2">
+          <div class="fld"><label>الاسم</label><input type="text" id="apName" value="${editing?esc(editing.name):''}"></div>
+          <div class="fld"><label>التصنيف</label><input type="text" id="apCat" value="${editing?esc(editing.cat):''}"></div>
+          <div class="fld"><label>السعر (د.ع)</label><input type="number" id="apPrice" value="${editing?editing.price:''}"></div>
+          <div class="fld"><label>رابط الصورة</label><input type="text" id="apImg" value="${editing?esc(editing.img):''}" placeholder="https://..."></div>
+        </div>
+        <div class="fld"><label>الوصف</label><textarea id="apDesc" rows="3">${editing?esc(editing.desc):''}</textarea></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-solid" onclick="saveProduct()">${editing?"💾 حفظ":"➕ إضافة"}</button>
+          ${editing?`<button class="btn btn-ghost" onclick="cancelEditProduct()">إلغاء</button>`:""}
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-weight:800;margin-bottom:12px">📦 المنتجات (${state.products.length})</div>
+        <div>${state.products.map(p=>`
+          <div class="list-row">
+            <img src="${esc(p.img)}">
+            <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</div><div style="font-size:11px;color:var(--sub)">${esc(p.cat)} — ${fmt(p.price)}</div></div>
+            <button class="icon-btn" onclick="editProduct('${p.id}')">✏️</button>
+            <button class="icon-btn" onclick="deleteProduct('${p.id}')">🗑️</button>
+          </div>`).join("")}</div>
+      </div>
+    </div>`;
+}
+function saveProduct(){
+  const name=document.getElementById("apName").value.trim();
+  const price=Number(document.getElementById("apPrice").value);
+  if(!name||!price) return;
+  const data={ name, cat:document.getElementById("apCat").value.trim(), price, img:document.getElementById("apImg").value.trim(), desc:document.getElementById("apDesc").value.trim() };
+  if (editingProductId){ const i=state.products.findIndex(p=>p.id===editingProductId); state.products[i]={...state.products[i], ...data}; editingProductId=null; }
+  else state.products.push({...data, id:"p"+Date.now()});
+  saveState(); render();
+}
+function editProduct(id){ editingProductId=id; render(); }
+function cancelEditProduct(){ editingProductId=null; render(); }
+function deleteProduct(id){ state.products=state.products.filter(p=>p.id!==id); saveState(); render(); }
+
+function renderASubs(){
+  const editing = state.subs.find(s=>s.id===editingSubId);
+  return `
+    <div style="display:grid;gap:16px">
+      <div class="card">
+        <div style="font-weight:800;margin-bottom:14px;font-size:15px">${editing?"✏️ تعديل":"➕ إضافة مشترك"}</div>
+        <div class="grid2">
+          <div class="fld"><label>الكود</label><input type="text" id="asCode" value="${editing?esc(editing.code):''}" placeholder="QST-1001"></div>
+          <div class="fld"><label>الاسم الكامل</label><input type="text" id="asName" value="${editing?esc(editing.name):''}"></div>
+          <div class="fld"><label>رقم الواتساب</label><input type="text" id="asWa" value="${editing?esc(editing.wa):''}"></div>
+          <div class="fld"><label>المنتج</label><select id="asProduct">
+            <option value="">اختر منتج</option>
+            ${state.products.map(p=>`<option value="${esc(p.name)}" ${editing&&editing.product===p.name?'selected':''}>${esc(p.name)}</option>`).join("")}
+          </select></div>
+          <div class="fld"><label>الإجمالي (د.ع)</label><input type="number" id="asTotal" value="${editing?editing.total:''}"></div>
+          <div class="fld"><label>عدد الأشهر</label><select id="asMonths">
+            ${[3,6,9,12].map(m=>`<option value="${m}" ${editing&&editing.months==m?'selected':''}>${m} أشهر</option>`).join("")}
+          </select></div>
+          <div class="fld"><label>المدفوع (د.ع)</label><input type="number" id="asPaid" value="${editing?editing.paid:''}"></div>
+          <div class="fld"><label>تاريخ الاستحقاق القادم</label><input type="date" id="asNext" value="${editing?editing.next:''}"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-solid" onclick="saveSub()">${editing?"💾 حفظ":"➕ إضافة"}</button>
+          ${editing?`<button class="btn btn-ghost" onclick="cancelEditSub()">إلغاء</button>`:""}
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-weight:800;margin-bottom:12px">👥 المشتركون (${state.subs.length})</div>
+        <div>${state.subs.map(s=>{
+          const dLeft=daysUntil(s.next);
+          const status = dLeft!==null && dLeft<=2 && dLeft>=0 ? "قريب" : dLeft!==null && dLeft<0 ? "متأخر" : null;
+          return `<div class="list-row" style="flex-direction:column;align-items:stretch">
+            <div style="display:flex;justify-content:space-between">
+              <div><div style="font-weight:700;font-size:13px">${esc(s.name)} <span style="color:var(--sky1);font-size:12px">(${esc(s.code)})</span></div><div style="font-size:11px;color:var(--sub);margin-top:2px">${esc(s.wa)} — ${esc(s.product)}</div></div>
+              <div style="display:flex;gap:4px"><button class="icon-btn" onclick="editSub('${s.id}')">✏️</button><button class="icon-btn" onclick="deleteSub('${s.id}')">🗑️</button></div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+              <span class="badge badge-green">مدفوع ${fmt(s.paid)}</span>
+              <span class="badge badge-red">متبقي ${fmt(s.total-s.paid)}</span>
+              <span class="badge badge-sky">${s.months} شهر</span>
+              ${status==="قريب"?`<span class="badge badge-orange">🔔 استحقاق خلال يومين</span>`:""}
+              ${status==="متأخر"?`<span class="badge badge-red">⚠️ متأخر عن السداد</span>`:""}
+            </div>
+          </div>`;
+        }).join("")}</div>
+      </div>
+    </div>`;
+}
+function saveSub(){
+  const code=document.getElementById("asCode").value.trim();
+  const name=document.getElementById("asName").value.trim();
+  if(!code||!name) return;
+  const data={ code, name, wa:document.getElementById("asWa").value.trim(), product:document.getElementById("asProduct").value,
+    total:Number(document.getElementById("asTotal").value)||0, months:Number(document.getElementById("asMonths").value),
+    paid:Number(document.getElementById("asPaid").value)||0, next:document.getElementById("asNext").value };
+  if (editingSubId){ const i=state.subs.findIndex(s=>s.id===editingSubId); state.subs[i]={...state.subs[i], ...data}; editingSubId=null; }
+  else state.subs.push({...data, id:"s"+Date.now()});
+  saveState(); render();
+}
+function editSub(id){ editingSubId=id; render(); }
+function cancelEditSub(){ editingSubId=null; render(); }
+function deleteSub(id){ state.subs=state.subs.filter(s=>s.id!==id); saveState(); render(); }
+
+function renderAMsgs(){
+  const sub = state.subs.find(s=>s.id===msgSelSubId);
+  const dLeft = sub ? daysUntil(sub.next) : null;
+  const suggestedType = dLeft!==null && dLeft<0 ? "warn" : "remind";
+  const monthly = sub ? fmt(sub.total/sub.months) : "...";
+  const templates = {
+    remind: `تذكير ودي من شركة ${state.info.name} 🔔\nعزيزنا ${sub?sub.name:"العميل الكريم"}،\nنود تذكيركم بأن قسط منتج (${sub?sub.product:"..."}) سيستحق بتاريخ ${sub?sub.next:"..."}.\nالمبلغ المطلوب: ${monthly}\nنرجو تجهيز المبلغ لتفادي أي تأخير.\nشكراً لثقتكم بنا 💙`,
+    warn: `تنبيه هام من شركة ${state.info.name} ⚠️\nعزيزنا ${sub?sub.name:"العميل الكريم"}،\nمر وقت على موعد استحقاق قسط (${sub?sub.product:"..."}) ولم نستلم الدفعة بعد.\nنرجو المبادرة بالتسديد لتجنب أي إجراءات.\nللتواصل: ${WA_NUM.replace("964","0")}`,
+    welcome: autoReplyText(),
+  };
+  const effType = sub ? suggestedType : "remind";
+  const txt = templates[effType];
+  const link = sub ? waHref(sub.wa, txt) : `https://wa.me/${WA_NUM}?text=${encodeURIComponent(txt)}`;
+  return `
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:6px;font-size:16px">📨 إرسال رسائل واتساب</div>
+      <p style="color:var(--sub);font-size:13px;margin-bottom:18px">عند اختيار مشترك، يُحدَّد نوع الرسالة تلقائياً حسب تاريخ الاستحقاق</p>
+      <div class="grid2" style="margin-bottom:18px">
+        <div class="fld"><label>اختر المشترك</label><select onchange="msgSelSubId=this.value;render()">
+          <option value="">(عام — بدون مشترك)</option>
+          ${state.subs.map(s=>`<option value="${s.id}" ${msgSelSubId===s.id?'selected':''}>${esc(s.name)} — ${esc(s.code)}</option>`).join("")}
+        </select></div>
+        <div class="fld"><label>نوع الرسالة</label><select disabled><option>${effType==='warn'?'⚠️ تحذير بعد التأخير':'🔔 تذكير قبل الاستحقاق'}</option></select></div>
+      </div>
+      ${sub && dLeft!==null ? `<div style="margin-bottom:14px">
+        ${dLeft<0?`<span class="badge badge-red">⚠️ متأخر ${Math.abs(dLeft)} يوم عن الاستحقاق</span>`:""}
+        ${dLeft>=0&&dLeft<=2?`<span class="badge badge-orange">🔔 الاستحقاق خلال ${dLeft} يوم</span>`:""}
+        ${dLeft>2?`<span class="badge badge-sky">الاستحقاق بعد ${dLeft} يوم</span>`:""}
+      </div>`:""}
+      <div style="background:var(--skyBg);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:13px;line-height:2;white-space:pre-wrap;margin-bottom:16px">${esc(txt)}</div>
+      <a class="btn btn-wa" href="${link}" target="_blank">📤 ${sub?`إرسال لـ ${esc(sub.name)}`:"إرسال لرقم الشركة"}</a>
+      ${sub?`<div style="margin-top:8px;font-size:12px;color:var(--sub)">رقم المشترك: ${esc(sub.wa)}</div>`:""}
+      <div style="margin-top:14px;font-size:12px;color:var(--sub);line-height:1.8;padding:10px 13px;background:#C8601010;border-radius:10px;border:1px solid #C8601022">
+        ⚡ هذا الملف ثابت (HTML) بدون خادم مجدوَل تلقائي؛ لإرسال آلي حقيقي على مدار الساعة تحتاج خادم صغير (مثلاً Firebase Cloud Functions) يفحص تواريخ الاستحقاق يومياً ويرسل عبر WhatsApp Business API.
+      </div>
+    </div>`;
+}
+
+function renderAFinancing(){
+  return `
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:14px;font-size:15px">💳 طلبات التمويل</div>
+      <div>${state.financing.length===0?`<div style="text-align:center;color:var(--sub);padding:20px">لا توجد طلبات بعد</div>`:
+      state.financing.map(f=>`
+        <div style="border:1px solid var(--border);border-radius:13px;padding:16px 18px;background:var(--skyBg);margin-bottom:12px">
+          <div style="margin-bottom:12px">
+            <div style="font-weight:800;font-size:15px">${esc(f.name)} <span style="color:var(--sub);font-weight:400;font-size:12px">(${esc(f.wa)})</span></div>
+            <div style="font-size:13px;color:var(--sub);margin-top:5px;line-height:1.8">📦 السلعة: ${esc(f.item)}<br>💵 السعر: ${fmt(f.price)}<br>📍 الموقع: ${esc(f.loc)}</div>
+            <div style="margin-top:8px">
+              ${f.status==="pending"?`<span class="badge badge-orange">⏳ قيد الانتظار</span>`:""}
+              ${f.status==="approved"?`<span class="badge badge-green">✅ مقبول</span>`:""}
+              ${f.status==="rejected"?`<span class="badge badge-red">❌ مرفوض</span>`:""}
+            </div>
+          </div>
+          ${f.status==="pending"?`
+          <div style="display:grid;gap:8px">
+            <input type="text" placeholder="سبب الرفض (اختياري إذا رفضت)" onchange="financingReasons['${f.id}']=this.value">
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-green" style="flex:1" onclick="approveFinancing('${f.id}')">✅ قبول وإرسال واتساب</button>
+              <button class="btn btn-danger" style="flex:1" onclick="rejectFinancing('${f.id}')">❌ رفض وإرسال واتساب</button>
+            </div>
+          </div>`:""}
+          ${f.status==="rejected"&&f.reason?`<div style="font-size:12px;color:var(--red);margin-top:6px">السبب: ${esc(f.reason)}</div>`:""}
+        </div>`).join("")}
+      </div>
+    </div>`;
+}
+function approveFinancing(id){
+  const f = state.financing.find(x=>x.id===id);
+  f.status="approved"; saveState();
+  const txt = `أهلاً بك ${f.name} 🌟\nيسعدنا إبلاغك بأن طلب تمويل (${f.item}) بقيمة ${fmt(f.price)} قد تم قبوله ✅\nسيتواصل معك موظفنا لإتمام إجراءات التقسيط.\nشكراً لثقتك بشركة قسطني 💙`;
+  window.open(waHref(f.wa, txt), "_blank");
+  render();
+}
+function rejectFinancing(id){
+  const f = state.financing.find(x=>x.id===id);
+  const reason = financingReasons[id] || "غير محدد";
+  f.status="rejected"; f.reason=reason; saveState();
+  const txt = `عزيزنا ${f.name}،\nنعتذر منك، تم الاعتذار عن طلب تمويل (${f.item}) لهذا السبب:\n${reason}\nيمكنك التواصل معنا لمزيد من التفاصيل أو تقديم طلب آخر.\nشكراً لتفهمك 🙏`;
+  window.open(waHref(f.wa, txt), "_blank");
+  render();
+}
+
+function renderAPartners(){
+  return `
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:14px">🤝 الشركات الشريكة</div>
+      <div class="grid2" style="margin-bottom:14px">
+        <input type="text" id="apnName" placeholder="اسم الشركة">
+        <input type="text" id="apnField" placeholder="مجال العمل">
+      </div>
+      <button class="btn btn-solid" style="margin-bottom:16px" onclick="addPartner()">➕ إضافة</button>
+      <div>${state.partners.map(p=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border:1px solid var(--border);border-radius:10px;background:var(--skyBg);margin-bottom:8px">
+          <div><b>${esc(p.name)}</b> — <span style="color:var(--sub)">${esc(p.field)}</span></div>
+          <button class="icon-btn" onclick="deletePartner('${p.id}')">🗑️</button>
+        </div>`).join("")}</div>
+    </div>`;
+}
+function addPartner(){
+  const name=document.getElementById("apnName").value.trim();
+  const field=document.getElementById("apnField").value.trim();
+  if(!name) return;
+  state.partners.push({id:"c"+Date.now(), name, field});
+  saveState(); render();
+}
+function deletePartner(id){ state.partners=state.partners.filter(p=>p.id!==id); saveState(); render(); }
+
+function renderAPricing(){
+  return `
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:6px;font-size:15px">💹 نسب زيادة الأقساط</div>
+      <p style="font-size:13px;color:var(--sub);margin-bottom:18px">حدد نسبة الزيادة % لكل مدة — يمكن جعلها 0%. التغيير فوري بكل الموقع.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:13px">
+        ${[3,6,9,12].map(m=>`
+          <div style="border:1.5px solid var(--border);border-radius:13px;padding:16px;text-align:center;background:var(--skyBg)">
+            <div style="font-weight:900;color:var(--sky1);font-size:16px;margin-bottom:10px">⏱ ${m} أشهر</div>
+            <input type="number" value="${state.markup[m]}" oninput="updateMarkup(${m}, this.value)" style="text-align:center;font-weight:800;font-size:16px">
+            <div id="markupPct${m}" style="font-size:11px;color:var(--sub);margin-top:6px">${state.markup[m]}% زيادة</div>
+            <div id="markupEx${m}" style="font-size:11px;color:var(--sky1);margin-top:3px;font-weight:700">${fmt(1000000*(1+state.markup[m]/100))}</div>
+          </div>`).join("")}
+      </div>
+    </div>`;
+}
+function updateMarkup(m, val){
+  state.markup[m] = val===""?0:Number(val);
+  saveState();
+  document.getElementById("markupPct"+m).textContent = state.markup[m] + "% زيادة";
+  document.getElementById("markupEx"+m).textContent = fmt(1000000*(1+state.markup[m]/100));
+}
+
+function renderAInfo(){
+  return `
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:14px;font-size:15px">🏢 معلومات الشركة</div>
+      <div class="fld"><label>اسم الشركة</label><input type="text" id="infoName" value="${esc(state.info.name)}" onchange="state.info.name=this.value;saveState();renderChrome()"></div>
+      <div class="fld"><label>نبذة عن الشركة</label><textarea id="infoAbout" rows="4" onchange="state.info.about=this.value;saveState()">${esc(state.info.about)}</textarea></div>
+      <div class="fld"><label>العنوان</label><input type="text" id="infoAddr" value="${esc(state.info.address)}" onchange="state.info.address=this.value;saveState()"></div>
+      <div style="margin-top:8px;padding:12px 16px;background:#073B5C10;border-radius:11px;border:1px solid #073B5C22">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:4px">✨ شعار المؤسس (ثابت)</div>
+        <div style="font-weight:700;color:var(--sky1);font-style:italic">"${FOUNDER}"</div>
+      </div>
+    </div>`;
+}
+
+function renderASettings(){
+  return `
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:6px;font-size:15px">🎨 تغيير الألوان والخلفية</div>
+      <p style="font-size:13px;color:var(--sub);margin-bottom:18px">التغيير فوري على كامل الموقع</p>
+      <div style="margin-bottom:22px">
+        <div style="font-weight:700;font-size:13px;margin-bottom:10px">لون الهوية الأساسي</div>
+        <div class="theme-grid">
+          ${HUE_PRESETS.map(p=>`
+            <button class="theme-opt ${state.hue===p.deg?'active':''}" onclick="setHue(${p.deg})">
+              <div class="swatch" style="background:linear-gradient(135deg, hsl(${200+p.deg},70%,55%), hsl(${210+p.deg},70%,25%))"></div>${p.label}
+            </button>`).join("")}
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:10px">لون خلفية الموقع</div>
+        <div class="theme-grid">
+          ${BG_PRESETS.map(p=>`
+            <button class="theme-opt ${state.bg===p.color?'active':''}" onclick="setBg('${p.color}')">
+              <div class="swatch" style="background:${p.color};border:1px solid var(--border)"></div>${p.label}
+            </button>`).join("")}
+        </div>
+      </div>
+      ${useFirebase?`<div style="margin-top:16px;font-size:12px;color:var(--green)">✅ متصل بـ Firebase — البيانات تُحفظ وتُزامن بين جميع الأجهزة</div>`
+      :`<div style="margin-top:16px;font-size:12px;color:var(--orange)">⚠️ غير متصل بـ Firebase حالياً — البيانات تُحفظ محلياً بهذا المتصفح فقط. راجع تعليمات الإعداد بأعلى الكود.</div>`}
+    </div>`;
+}
+function setHue(deg){ state.hue=deg; saveState(); applyTheme(); render(); }
+function setBg(color){ state.bg=color; saveState(); applyTheme(); render(); }
+
+/* ═══════════ التصيير الرئيسي ═══════════ */
+function render(){
+  renderChrome();
+  const main = document.getElementById("main");
+  if (currentTab==="home") main.innerHTML = renderHome();
+  else if (currentTab==="calc") main.innerHTML = renderCalc();
+  else if (currentTab==="lookup") main.innerHTML = renderLookup();
+  else if (currentTab==="financing") main.innerHTML = renderFinancing();
+  else if (currentTab==="wa") main.innerHTML = renderWA();
+  else if (currentTab==="admin") main.innerHTML = authed ? renderAdmin() : renderAdminLogin();
+  applyTheme();
+}
+
+loadState(()=>{ render(); });
+</script>
+</body>
+</html>
