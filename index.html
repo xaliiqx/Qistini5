@@ -264,14 +264,14 @@ let state = {
     {id:"c3", name:"شركة الأمين للأثاث", field:"أثاث وديكور"},
   ],
   subs: [
-    {id:"s1", code:"QST-1042", name:"أحمد كريم عبدالله", wa:"07701234567", product:"ثلاجة LG انفرتر 18 قدم", total:920000, months:6, paid:460000, next:"2026-07-01"},
-    {id:"s2", code:"QST-1058", name:"زينب محمد علي", wa:"07809876543", product:"موبايل سامسونج S24", total:1320000, months:9, paid:440000, next:"2026-07-15"},
+    {id:"s1", code:"QST-1042", name:"أحمد كريم عبدالله", wa:"07701234567", product:"ثلاجة LG انفرتر 18 قدم", total:920000, months:8, paid:460000, next:"2026-07-01", guarantorName:"علي محسن", guarantorPhone:"07701112222", cashPrice:850000, downPayment:100000, downPaymentDate:"2026-03-01", startDate:"2026-03-01"},
+    {id:"s2", code:"QST-1058", name:"زينب محمد علي", wa:"07809876543", product:"موبايل سامسونج S24", total:1320000, months:10, paid:440000, next:"2026-07-15", guarantorName:"", guarantorPhone:"", cashPrice:1100000, downPayment:150000, downPaymentDate:"2026-02-15", startDate:"2026-02-15"},
   ],
-  markup: {3:8, 6:14, 9:20, 12:27},
+  markup: {4:10, 8:16, 10:22, 12:27},
   financing: [
     {id:"f1", name:"علي حسين جواد", wa:"07712345678", item:"غسالة سامسونج 9 كغم", price:620000, loc:"بغداد - الكرادة", status:"pending", reason:""},
   ],
-  info: { name:"شركة قسطني للتسويق والتقسيط", about:"قسطني متخصصة ببيع الأجهزة المنزلية والإلكترونيات نقداً وبالتقسيط المريح.", address:"بغداد - شارع فلسطين" },
+  info: { name:"شركة قسطني للتسويق والتقسيط", about:"قسطني متخصصة ببيع الأجهزة المنزلية والإلكترونيات نقداً وبالتقسيط المريح.", address:"بغداد - شارع فلسطين", mastercard:"8483533967" },
   hue: 0,
   bg: "#E5F2FA",
 };
@@ -532,7 +532,7 @@ function openProductModal(id){ modalProduct = state.products.find(p=>p.id===id);
 function closeProductModal(){ modalProduct = null; render(); }
 function renderProductModal(){
   const p = modalProduct;
-  const plans = [3,6,9,12].map(m=>{
+  const plans = [4,8,10,12].map(m=>{
     const pct = state.markup[m]||0;
     const tot = p.price*(1+pct/100);
     return {m, tot, mo: tot/m, pct};
@@ -584,7 +584,7 @@ function renderCalcResult(){
   const n = Number(raw)||0;
   const box = document.getElementById("calcResult");
   if (n<=0){ box.innerHTML=""; return; }
-  const plans = [3,6,9,12].map(m=>{ const pct=state.markup[m]||0; const tot=n*(1+pct/100); return {m, tot, mo: tot/m, pct}; });
+  const plans = [4,8,10,12].map(m=>{ const pct=state.markup[m]||0; const tot=n*(1+pct/100); return {m, tot, mo: tot/m, pct}; });
   box.innerHTML = `
     <div style="background:var(--skyBg);border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between">
       <span style="color:var(--sub)">السعر النقدي</span><span style="color:var(--green);font-weight:900;font-size:18px">${fmt(n)}</span>
@@ -873,15 +873,18 @@ function renderASubs(){
           </select></div>
           <div class="fld"><label>الإجمالي (د.ع)</label><input type="number" id="asTotal" value="${editing?editing.total:''}"></div>
           <div class="fld"><label>عدد الأشهر</label><select id="asMonths">
-            ${[3,6,9,12].map(m=>`<option value="${m}" ${editing&&editing.months==m?'selected':''}>${m} أشهر</option>`).join("")}
+            ${[4,8,10,12].map(m=>`<option value="${m}" ${editing&&editing.months==m?'selected':''}>${m} أشهر</option>`).join("")}
           </select></div>
           <div class="fld"><label>المدفوع (د.ع)</label><input type="number" id="asPaid" value="${editing?editing.paid:''}"></div>
           <div class="fld"><label>تاريخ الاستحقاق القادم</label><input type="date" id="asNext" value="${editing?editing.next:''}"></div>
+          <div class="fld"><label>اسم الكفيل</label><input type="text" id="asGName" value="${editing&&editing.guarantorName?esc(editing.guarantorName):''}" placeholder="${GUARANTOR_NAME}"></div>
+          <div class="fld"><label>رقم هاتف الكفيل</label><input type="text" id="asGPhone" value="${editing&&editing.guarantorPhone?esc(editing.guarantorPhone):''}" placeholder="07xxxxxxxxx"></div>
         </div>
         <div style="display:flex;gap:8px">
           <button class="btn btn-solid" onclick="saveSub()">${editing?"💾 حفظ":"➕ إضافة"}</button>
           ${editing?`<button class="btn btn-ghost" onclick="cancelEditSub()">إلغاء</button>`:""}
         </div>
+        <div style="margin-top:10px;font-size:11.5px;color:var(--sub)">لتعديل السعر نقداً، المقدمة، تاريخ أول قسط، أو رفع مستمسكات العميل، استخدم تبويب "📄 عقد الشراء" من القائمة أعلاه.</div>
       </div>
       <div class="card">
         <div style="font-weight:800;margin-bottom:12px">👥 المشتركون (${state.subs.length})</div>
@@ -890,7 +893,8 @@ function renderASubs(){
           const status = dLeft!==null && dLeft<=2 && dLeft>=0 ? "قريب" : dLeft!==null && dLeft<0 ? "متأخر" : null;
           return `<div class="list-row" style="flex-direction:column;align-items:stretch">
             <div style="display:flex;justify-content:space-between">
-              <div><div style="font-weight:700;font-size:13px">${esc(s.name)} <span style="color:var(--sky1);font-size:12px">(${esc(s.code)})</span></div><div style="font-size:11px;color:var(--sub);margin-top:2px">${esc(s.wa)} — ${esc(s.product)}</div></div>
+              <div><div style="font-weight:700;font-size:13px">${esc(s.name)} <span style="color:var(--sky1);font-size:12px">(${esc(s.code)})</span></div><div style="font-size:11px;color:var(--sub);margin-top:2px">${esc(s.wa)} — ${esc(s.product)}</div>
+              ${s.guarantorName?`<div style="font-size:11px;color:var(--sub);margin-top:2px">👤 الكفيل: ${esc(s.guarantorName)} ${s.guarantorPhone?'— '+esc(s.guarantorPhone):''}</div>`:''}</div>
               <div style="display:flex;gap:4px"><button class="icon-btn" onclick="editSub('${s.id}')">✏️</button><button class="icon-btn" onclick="deleteSub('${s.id}')">🗑️</button></div>
             </div>
             <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
@@ -911,7 +915,8 @@ function saveSub(){
   if(!code||!name) return;
   const data={ code, name, wa:document.getElementById("asWa").value.trim(), product:document.getElementById("asProduct").value,
     total:Number(document.getElementById("asTotal").value)||0, months:Number(document.getElementById("asMonths").value),
-    paid:Number(document.getElementById("asPaid").value)||0, next:document.getElementById("asNext").value };
+    paid:Number(document.getElementById("asPaid").value)||0, next:document.getElementById("asNext").value,
+    guarantorName:document.getElementById("asGName").value.trim(), guarantorPhone:document.getElementById("asGPhone").value.trim() };
   if (editingSubId){ const i=state.subs.findIndex(s=>s.id===editingSubId); state.subs[i]={...state.subs[i], ...data}; editingSubId=null; }
   else state.subs.push({...data, id:"s"+Date.now()});
   saveState(); render();
@@ -1113,7 +1118,7 @@ function renderAPricing(){
       <div style="font-weight:800;margin-bottom:6px;font-size:15px">💹 نسب زيادة الأقساط</div>
       <p style="font-size:13px;color:var(--sub);margin-bottom:18px">حدد نسبة الزيادة % لكل مدة — يمكن جعلها 0%. التغيير فوري بكل الموقع.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:13px">
-        ${[3,6,9,12].map(m=>`
+        ${[4,8,10,12].map(m=>`
           <div style="border:1.5px solid var(--border);border-radius:13px;padding:16px;text-align:center;background:var(--skyBg)">
             <div style="font-weight:900;color:var(--sky1);font-size:16px;margin-bottom:10px">⏱ ${m} أشهر</div>
             <input type="number" value="${state.markup[m]}" oninput="updateMarkup(${m}, this.value)" style="text-align:center;font-weight:800;font-size:16px">
