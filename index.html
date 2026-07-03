@@ -274,6 +274,7 @@ let state = {
   info: { name:"شركة قسطني للتسويق والتقسيط", about:"قسطني متخصصة ببيع الأجهزة المنزلية والإلكترونيات نقداً وبالتقسيط المريح.", address:"بغداد - شارع فلسطين", mastercard:"8483533967" },
   hue: 0,
   bg: "#E5F2FA",
+  adminPass: ADMIN_PASS,
 };
 
 let currentTab = "home";
@@ -481,7 +482,7 @@ function renderHome(){
     <div class="card" style="margin-bottom:24px">
       <div style="font-weight:800;margin-bottom:14px;color:var(--sky1);font-size:15px">📄 نموذج عقد الشراء بالتقسيط <span style="font-weight:400;font-size:12px;color:var(--sub)">(للاطلاع فقط)</span></div>
       <div class="cd-line">اني السيد <span class="cd-blank">[ اسم المشتري ]</span> اشتريت <span class="cd-blank">[ اسم المنتج ]</span></div>
-      <div class="cd-line">بكفالة من السيد <span class="cd-blank">علي محسن</span></div>
+      <div class="cd-line">بكفالة من السيد <span class="cd-blank">[     ]</span></div>
       <div class="cd-line">وكان سعره نقداً <span class="cd-blank">[     ]</span> دينار</div>
       <div class="cd-line">وقبلت شراءه بمبلغ <span class="cd-blank">[     ]</span> دينار قسطاً</div>
       <div class="cd-line">بمقدمة <span class="cd-blank">[     ]</span> دينار والباقي <span class="cd-blank">[     ]</span> قسطاً</div>
@@ -689,11 +690,17 @@ function submitFinancing(){
   if(!name||!wa||!item||!price||!loc) return;
   state.financing.unshift({id:"f"+Date.now(), name, wa, item, price, loc, status:"pending", reason:""});
   saveState();
+  const notifyMsg = `📥 طلب تمويل جديد — قسطني\nالاسم: ${name}\nرقم الواتساب: ${wa}\nالسلعة: ${item}\nالسعر: ${fmt(price)}\nالموقع: ${loc}`;
+  const notifyLink = `https://wa.me/${WA_NUM}?text=${encodeURIComponent(notifyMsg)}`;
+  window.open(notifyLink, "_blank");
   document.getElementById("financingWrap").innerHTML = `
     <div class="card" style="padding:34px;text-align:center">
       <div style="font-size:52px;margin-bottom:12px">✅</div>
       <h3 style="font-size:18px;font-weight:900;margin-bottom:8px">تم إرسال طلبك بنجاح!</h3>
       <p style="color:var(--sub);line-height:1.8;font-size:14px;margin-bottom:20px">وصل طلبك للإدارة. سيتواصلون معك على واتساب <b>${esc(wa)}</b> بالقبول أو الرفض.</p>
+      <p style="color:var(--sub);font-size:12px;margin-bottom:14px">إذا لم تفتح صفحة واتساب تلقائياً، اضغط الزر أدناه لإرسال الطلب للإدارة مباشرةً</p>
+      <a class="btn btn-wa" href="${notifyLink}" target="_blank" style="display:inline-block;margin-bottom:10px">📲 إرسال إشعار للإدارة عبر واتساب</a>
+      <br>
       <button class="btn btn-outline" onclick="goTab('financing')">إرسال طلب آخر</button>
     </div>`;
 }
@@ -752,7 +759,7 @@ function renderAdminLogin(){
 }
 function doAdminLogin(){
   const p = document.getElementById("adminPass").value;
-  if (p === ADMIN_PASS){ authed = true; adminSec="dash"; render(); }
+  if (p === (state.adminPass||ADMIN_PASS)){ authed = true; adminSec="dash"; render(); }
   else {
     document.getElementById("adminErr").innerHTML = `<div style="color:var(--red);font-size:13px;margin-top:8px">كلمة المرور غير صحيحة</div>`;
   }
@@ -1174,7 +1181,38 @@ function renderASettings(){
       </div>
       ${useFirebase?`<div style="margin-top:16px;font-size:12px;color:var(--green)">✅ متصل بـ Firebase — البيانات تُحفظ وتُزامن بين جميع الأجهزة</div>`
       :`<div style="margin-top:16px;font-size:12px;color:var(--orange)">⚠️ غير متصل بـ Firebase حالياً — البيانات تُحفظ محلياً بهذا المتصفح فقط. راجع تعليمات الإعداد بأعلى الكود.</div>`}
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div style="font-weight:800;margin-bottom:6px;font-size:15px">🔑 تغيير كلمة مرور لوحة التحكم</div>
+      <p style="font-size:13px;color:var(--sub);margin-bottom:16px">استخدمها بدل كلمة المرور الحالية عند الدخول للإدارة</p>
+      <div class="fld"><label>كلمة المرور الحالية</label><input type="password" id="curPass" placeholder="● ● ● ● ● ●"></div>
+      <div class="fld"><label>كلمة المرور الجديدة</label><input type="password" id="newPass" placeholder="● ● ● ● ● ●"></div>
+      <div class="fld"><label>تأكيد كلمة المرور الجديدة</label><input type="password" id="newPass2" placeholder="● ● ● ● ● ●"></div>
+      <div id="passMsg"></div>
+      <button class="btn btn-solid" onclick="changeAdminPassword()">💾 حفظ كلمة المرور الجديدة</button>
     </div>`;
+}
+function changeAdminPassword(){
+  const cur = document.getElementById("curPass").value;
+  const n1 = document.getElementById("newPass").value;
+  const n2 = document.getElementById("newPass2").value;
+  const msgBox = document.getElementById("passMsg");
+  const currentPass = state.adminPass || ADMIN_PASS;
+  if (cur !== currentPass){
+    msgBox.innerHTML = `<div style="color:var(--red);font-size:13px;margin:6px 0">كلمة المرور الحالية غير صحيحة</div>`; return;
+  }
+  if (!n1 || n1.length < 4){
+    msgBox.innerHTML = `<div style="color:var(--red);font-size:13px;margin:6px 0">كلمة المرور الجديدة يجب أن تكون 4 أحرف/أرقام على الأقل</div>`; return;
+  }
+  if (n1 !== n2){
+    msgBox.innerHTML = `<div style="color:var(--red);font-size:13px;margin:6px 0">كلمة المرور الجديدة وتأكيدها غير متطابقين</div>`; return;
+  }
+  state.adminPass = n1;
+  saveState();
+  msgBox.innerHTML = `<div style="color:var(--green);font-size:13px;margin:6px 0">✅ تم تغيير كلمة المرور بنجاح</div>`;
+  document.getElementById("curPass").value = "";
+  document.getElementById("newPass").value = "";
+  document.getElementById("newPass2").value = "";
 }
 function setHue(deg){ state.hue=deg; saveState(); applyTheme(); render(); }
 function setBg(color){ state.bg=color; saveState(); applyTheme(); render(); }
