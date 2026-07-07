@@ -2,8 +2,17 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>قسطني</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1276A8">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="قسطني">
+<meta name="mobile-web-app-capable" content="yes">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
@@ -32,6 +41,9 @@ a{text-decoration:none}
 @keyframes wab{0%,100%{transform:scale(1)}50%{transform:scale(1.13)}}
 .wa-float{position:fixed;bottom:22px;left:22px;z-index:999;width:58px;height:58px;background:#25D366;border-radius:999px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px #25D36660}
 .wa-float svg{animation:wab 2.5s ease-in-out infinite}
+.install-float{position:fixed;bottom:92px;left:22px;z-index:999;width:58px;height:58px;background:var(--sky1);border-radius:999px;display:none;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.25);font-size:26px;cursor:pointer;border:none;color:#fff}
+.install-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px}
+.install-modal{background:var(--white);border-radius:18px;padding:26px 22px;max-width:360px;width:100%;text-align:center}
 
 /* نافبار */
 nav{background:var(--white);border-bottom:1px solid var(--border);box-shadow:0 2px 10px rgba(7,59,92,.08);position:sticky;top:0;z-index:50}
@@ -196,6 +208,21 @@ footer{background:var(--sky1);color:#fff;padding:26px 20px;text-align:center;mar
 <a class="wa-float" id="waFloatBtn" href="#" target="_blank">
   <svg width="30" height="30" viewBox="0 0 32 32" fill="#fff"><path d="M16 2C8.27 2 2 8.27 2 16c0 2.4.63 4.65 1.72 6.6L2 30l7.61-1.7A13.94 13.94 0 0016 30c7.73 0 14-6.27 14-14S23.73 2 16 2zm6.34 19.46c-.35-.17-2.06-1.02-2.38-1.13-.32-.12-.55-.17-.78.17-.23.35-.9 1.13-1.1 1.36-.2.23-.4.26-.75.09-.35-.17-1.47-.54-2.8-1.73-1.03-.92-1.73-2.06-1.93-2.41-.2-.35-.02-.54.15-.71.16-.16.35-.41.52-.61.17-.2.23-.35.35-.58.12-.23.06-.44-.03-.61-.09-.17-.78-1.89-1.07-2.59-.28-.68-.57-.59-.78-.6-.2-.01-.44-.01-.67-.01s-.61.09-.93.43c-.32.35-1.22 1.19-1.22 2.9s1.25 3.37 1.42 3.6c.17.23 2.45 3.75 5.95 5.25.83.36 1.48.57 1.99.73.84.26 1.59.23 2.19.14.67-.1 2.06-.84 2.35-1.66.29-.81.29-1.51.2-1.66-.09-.14-.32-.23-.67-.4z"/></svg>
 </a>
+
+<button class="install-float" id="installFloatBtn" onclick="handleInstallClick()" title="تثبيت التطبيق">📲</button>
+
+<div class="install-modal-backdrop" id="iosInstallModal" style="display:none">
+  <div class="install-modal">
+    <div style="font-size:44px;margin-bottom:10px">📲</div>
+    <h3 style="font-weight:900;font-size:16px;margin-bottom:12px">تثبيت تطبيق قسطني</h3>
+    <p style="font-size:13.5px;color:var(--sub);line-height:2;margin-bottom:16px">
+      1) اضغط زر <b>المشاركة</b> ⬆️ بالأسفل بمتصفح Safari<br>
+      2) اختر <b>"إضافة إلى الشاشة الرئيسية"</b><br>
+      3) اضغط <b>"إضافة"</b> — وراح تظهر أيقونة قسطني بشاشتك مباشرة 🎉
+    </p>
+    <button class="btn btn-solid" style="width:100%" onclick="document.getElementById('iosInstallModal').style.display='none'">فهمت، شكراً</button>
+  </div>
+</div>
 
 <script>
 /* ═══════════════════════════════════════════════════
@@ -1231,6 +1258,42 @@ function render(){
 }
 
 loadState(()=>{ render(); });
+
+/* ═══════════ تثبيت التطبيق (PWA) ═══════════ */
+let deferredInstallPrompt = null;
+function isStandalone(){
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+function isIOS(){
+  return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+}
+window.addEventListener("beforeinstallprompt", (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById("installFloatBtn");
+  if(btn && !isStandalone()) btn.style.display = "flex";
+});
+window.addEventListener("appinstalled", ()=>{
+  const btn = document.getElementById("installFloatBtn");
+  if(btn) btn.style.display = "none";
+  deferredInstallPrompt = null;
+});
+function handleInstallClick(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(()=>{ deferredInstallPrompt = null; });
+  } else if(isIOS()){
+    document.getElementById("iosInstallModal").style.display = "flex";
+  }
+}
+if(!isStandalone() && isIOS()){
+  document.getElementById("installFloatBtn").style.display = "flex";
+}
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
