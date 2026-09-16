@@ -2,17 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>قسطني</title>
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#1276A8">
-<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="قسطني">
-<meta name="mobile-web-app-capable" content="yes">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
@@ -41,9 +32,6 @@ a{text-decoration:none}
 @keyframes wab{0%,100%{transform:scale(1)}50%{transform:scale(1.13)}}
 .wa-float{position:fixed;bottom:22px;left:22px;z-index:999;width:58px;height:58px;background:#25D366;border-radius:999px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px #25D36660}
 .wa-float svg{animation:wab 2.5s ease-in-out infinite}
-.install-float{position:fixed;bottom:92px;left:22px;z-index:999;width:58px;height:58px;background:var(--sky1);border-radius:999px;display:none;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.25);font-size:26px;cursor:pointer;border:none;color:#fff}
-.install-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px}
-.install-modal{background:var(--white);border-radius:18px;padding:26px 22px;max-width:360px;width:100%;text-align:center}
 
 /* نافبار */
 nav{background:var(--white);border-bottom:1px solid var(--border);box-shadow:0 2px 10px rgba(7,59,92,.08);position:sticky;top:0;z-index:50}
@@ -144,6 +132,8 @@ footer{background:var(--sky1);color:#fff;padding:26px 20px;text-align:center;mar
 .cd-sign{display:flex;justify-content:space-between;gap:20px;margin-top:26px;flex-wrap:wrap}
 .cd-sign div{flex:1;min-width:140px;text-align:center;padding-top:30px;border-top:1px solid var(--text);font-size:12.5px;color:var(--sub)}
 .cd-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--skyBg)}
+.contract-paper{background:#FEFDF9;border:1.5px dashed var(--border);border-radius:12px;padding:20px;transition:border-color .15s}
+.contract-paper:focus{outline:none;border-color:var(--sky3);border-style:solid}
 .doc-upload-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media (max-width:520px){.doc-upload-grid{grid-template-columns:1fr}}
 .doc-upload-item{border:1.5px dashed var(--border);border-radius:12px;padding:10px;background:var(--skyBg)}
@@ -208,21 +198,6 @@ footer{background:var(--sky1);color:#fff;padding:26px 20px;text-align:center;mar
 <a class="wa-float" id="waFloatBtn" href="#" target="_blank">
   <svg width="30" height="30" viewBox="0 0 32 32" fill="#fff"><path d="M16 2C8.27 2 2 8.27 2 16c0 2.4.63 4.65 1.72 6.6L2 30l7.61-1.7A13.94 13.94 0 0016 30c7.73 0 14-6.27 14-14S23.73 2 16 2zm6.34 19.46c-.35-.17-2.06-1.02-2.38-1.13-.32-.12-.55-.17-.78.17-.23.35-.9 1.13-1.1 1.36-.2.23-.4.26-.75.09-.35-.17-1.47-.54-2.8-1.73-1.03-.92-1.73-2.06-1.93-2.41-.2-.35-.02-.54.15-.71.16-.16.35-.41.52-.61.17-.2.23-.35.35-.58.12-.23.06-.44-.03-.61-.09-.17-.78-1.89-1.07-2.59-.28-.68-.57-.59-.78-.6-.2-.01-.44-.01-.67-.01s-.61.09-.93.43c-.32.35-1.22 1.19-1.22 2.9s1.25 3.37 1.42 3.6c.17.23 2.45 3.75 5.95 5.25.83.36 1.48.57 1.99.73.84.26 1.59.23 2.19.14.67-.1 2.06-.84 2.35-1.66.29-.81.29-1.51.2-1.66-.09-.14-.32-.23-.67-.4z"/></svg>
 </a>
-
-<button class="install-float" id="installFloatBtn" onclick="handleInstallClick()" title="تثبيت التطبيق">📲</button>
-
-<div class="install-modal-backdrop" id="iosInstallModal" style="display:none">
-  <div class="install-modal">
-    <div style="font-size:44px;margin-bottom:10px">📲</div>
-    <h3 style="font-weight:900;font-size:16px;margin-bottom:12px">تثبيت تطبيق قسطني</h3>
-    <p style="font-size:13.5px;color:var(--sub);line-height:2;margin-bottom:16px">
-      1) اضغط زر <b>المشاركة</b> ⬆️ بالأسفل بمتصفح Safari<br>
-      2) اختر <b>"إضافة إلى الشاشة الرئيسية"</b><br>
-      3) اضغط <b>"إضافة"</b> — وراح تظهر أيقونة قسطني بشاشتك مباشرة 🎉
-    </p>
-    <button class="btn btn-solid" style="width:100%" onclick="document.getElementById('iosInstallModal').style.display='none'">فهمت، شكراً</button>
-  </div>
-</div>
 
 <script>
 /* ═══════════════════════════════════════════════════
@@ -292,16 +267,15 @@ let state = {
   ],
   subs: [
     {id:"s1", code:"QST-1042", name:"أحمد كريم عبدالله", wa:"07701234567", product:"ثلاجة LG انفرتر 18 قدم", total:920000, months:8, paid:460000, next:"2026-07-01", guarantorName:"علي محسن", guarantorPhone:"07701112222", cashPrice:850000, downPayment:100000, downPaymentDate:"2026-03-01", startDate:"2026-03-01"},
-    {id:"s2", code:"QST-1058", name:"زينب محمد علي", wa:"07809876543", product:"موبايل سامسونج S24", total:1320000, months:10, paid:440000, next:"2026-07-15", guarantorName:"", guarantorPhone:"", cashPrice:1100000, downPayment:150000, downPaymentDate:"2026-02-15", startDate:"2026-02-15"},
+    {id:"s2", code:"QST-1058", name:"زينب محمد علي", wa:"07809876543", product:"موبايل سامسونج S24", total:1320000, months:12, paid:440000, next:"2026-07-15", guarantorName:"", guarantorPhone:"", cashPrice:1100000, downPayment:150000, downPaymentDate:"2026-02-15", startDate:"2026-02-15"},
   ],
-  markup: {4:10, 8:16, 10:22, 12:27},
+  markup: {4:10, 8:16, 10:22, 12:27, 18:50},
   financing: [
     {id:"f1", name:"علي حسين جواد", wa:"07712345678", item:"غسالة سامسونج 9 كغم", price:620000, loc:"بغداد - الكرادة", status:"pending", reason:""},
   ],
   info: { name:"شركة قسطني للتسويق والتقسيط", about:"قسطني متخصصة ببيع الأجهزة المنزلية والإلكترونيات نقداً وبالتقسيط المريح.", address:"بغداد - شارع فلسطين", mastercard:"8483533967" },
   hue: 0,
   bg: "#E5F2FA",
-  adminPass: ADMIN_PASS,
 };
 
 let currentTab = "home";
@@ -340,7 +314,10 @@ function loadLocal(){
 }
 
 /* ─── أدوات ─── */
-function fmt(n){ return Math.round(n||0).toLocaleString("ar-IQ") + " د.ع"; }
+function fmt(n, currency){
+  if(currency==="USD") return Math.round(n||0).toLocaleString("en-US") + " $";
+  return Math.round(n||0).toLocaleString("ar-IQ") + " د.ع";
+}
 function waHref(num, txt){ return `https://wa.me/964${String(num).replace(/^0/,"")}?text=${encodeURIComponent(txt)}`; }
 function autoReplyText(){ return `أهلاً وسهلاً بيك بـ ${state?.info?.name || "شركة قسطني"} 🌟\nسيجيبك الموظف المختص بعد قليل.\nشكراً على انتظارك 🙏`; }
 function todayISO(){ return new Date().toISOString().slice(0,10); }
@@ -383,10 +360,10 @@ function contractDocHtml(sub){
     </div>
     <p class="cd-line">اني السيد <span class="cd-blank">${esc(sub.name)}</span> اشتريت <span class="cd-blank">${esc(sub.product||"—")}</span></p>
     <p class="cd-line">بكفالة من السيد <span class="cd-blank">${esc(guarantorName)}</span></p>
-    <p class="cd-line">وكان سعره نقداً <span class="cd-blank">${sub.cashPrice?fmt(sub.cashPrice):"—"}</span></p>
-    <p class="cd-line">وقبلت شراءه بمبلغ <span class="cd-blank">${fmt(sub.total)}</span> قسطاً</p>
-    <p class="cd-line">بمقدمة <span class="cd-blank">${fmt(sub.downPayment||0)}</span> والباقي <span class="cd-blank">${sub.months||0}</span> قسطاً</p>
-    <p class="cd-line">بمقدار <span class="cd-blank">${fmt(monthly)}</span> لكل شهر لمدة <span class="cd-blank">${sub.months||0}</span> شهر</p>
+    <p class="cd-line">وكان سعره نقداً <span class="cd-blank">${sub.cashPrice?fmt(sub.cashPrice, sub.currency):"—"}</span></p>
+    <p class="cd-line">وقبلت شراءه بمبلغ <span class="cd-blank">${fmt(sub.total, sub.currency)}</span> قسطاً</p>
+    <p class="cd-line">بمقدمة <span class="cd-blank">${fmt(sub.downPayment||0, sub.currency)}</span> والباقي <span class="cd-blank">${sub.months||0}</span> قسطاً</p>
+    <p class="cd-line">بمقدار <span class="cd-blank">${fmt(monthly, sub.currency)}</span> لكل شهر لمدة <span class="cd-blank">${sub.months||0}</span> شهر</p>
     <p class="cd-line">حيث يبدأ دفع القسط الاول بتاريخ <span class="cd-blank">${sub.startDate?fmtDateAr(sub.startDate):"—"}</span></p>
     <p class="cd-line">وينتهي بتاريخ <span class="cd-blank">${endDate?fmtDateAr(endDate):"—"}</span></p>
     ${sub.notes?`<div style="margin-top:10px;font-size:13px;color:var(--sub)"><b>ملاحظات:</b> ${esc(sub.notes)}</div>`:""}
@@ -404,6 +381,126 @@ function contractDocHtml(sub){
       <div>تاريخ دفع المقدمة<br>${sub.downPaymentDate?fmtDateAr(sub.downPaymentDate):"—"}</div>
       <div>اسم المشتري والتوقيع<br>${esc(sub.name)}</div>
     </div>`;
+}
+
+/* ─── التعهد الخطي القابل للطباعة ─── */
+function pledgeBodyHtml(d){
+  return `
+    <div style="text-align:center;font-weight:900;font-size:18px;color:var(--sky1);margin-bottom:18px">تعهد خطي</div>
+    <p class="cd-line">اني الموقع أدناه السيد/ة <span class="cd-blank">${esc(d.buyerName)}</span></p>
+    <p class="cd-line">حامل رقم الهاتف <span class="cd-blank">${esc(d.buyerWa)}</span> والساكن في <span class="cd-blank">${esc(d.buyerAddress||"—")}</span></p>
+    <p class="cd-line">أتعهد بموجب هذا التعهد الخطي بالالتزام التام بسداد قيمة السلعة المذكورة أدناه والمشتراة من شركة قسطني بنظام التقسيط، وذلك حسب الشروط التالية:</p>
+    <div style="background:var(--skyBg);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13.5px;line-height:2">
+      <div>السلعة المشتراة: <b>${esc(d.product)}</b></div>
+      <div>إجمالي مبلغ القسط: <b>${typeof d.total==="number"?fmt(d.total, d.currency):esc(d.total)}</b></div>
+      <div>عدد الأشهر: <b>${esc(d.months)}</b> — القسط الشهري: <b>${typeof d.monthly==="number"?fmt(d.monthly, d.currency):esc(d.monthly)}</b></div>
+      <div>كود المشترك: <b>${esc(d.code)}</b></div>
+    </div>
+    <p class="cd-line">وأتعهد بما يلي:</p>
+    <ul class="cd-terms">
+      <li>الالتزام بسداد كل قسط شهري في موعده المحدد، ولا يتجاوز التأخير 3 أيام من تاريخ الاستحقاق.</li>
+      <li>تحمّل كامل المسؤولية القانونية والمالية في حال التوقف عن السداد أو التأخر المتكرر دون عذر مقبول.</li>
+      <li>عدم التصرف بالسلعة (بيع، رهن، أو نقل ملكية) قبل سداد كامل قيمة الأقساط المستحقة.</li>
+      <li>تحديث بيانات التواصل (رقم الهاتف والعنوان) فوراً عند أي تغيير لضمان استمرار التواصل مع الشركة.</li>
+      <li>في حال الإخلال بأي بند من هذا التعهد، يحق للشركة اتخاذ الإجراءات القانونية اللازمة لاسترداد حقوقها.</li>
+    </ul>
+    <p class="cd-line" style="margin-top:10px">وهذا إقرار وتعهد مني بذلك، وقد وقعت عليه بكامل إرادتي واختياري دون أي إكراه.</p>
+    <div class="cd-sign">
+      <div>التاريخ<br>${esc(d.date)}</div>
+      <div>اسم المتعهد والتوقيع<br>${esc(d.buyerName)}</div>
+    </div>`;
+}
+function pledgeDocHtml(sub){
+  const monthly = sub.months>0 ? Math.round((sub.total-(sub.downPayment||0))/sub.months) : 0;
+  return pledgeBodyHtml({
+    buyerName: sub.name, buyerWa: sub.wa, buyerAddress: sub.address||"",
+    product: sub.product||"—", total: sub.total||0, months: sub.months||0, monthly, currency: sub.currency,
+    code: sub.code, date: todayISO()
+  });
+}
+function openPrintWindow(title, bodyHtml){
+  const w = window.open("", "_blank");
+  if(!w){ alert("يرجى السماح بالنوافذ المنبثقة (Pop-ups) لهذا الموقع عشان تگدر تطبع."); return; }
+  w.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>${title}</title>
+    <style>
+      *{box-sizing:border-box;font-family:Tahoma,'Segoe UI',Arial,sans-serif}
+      body{padding:32px;color:#0B1E2D;direction:rtl;max-width:720px;margin:0 auto}
+      .cd-line{font-size:14.5px;line-height:2.3;margin:2px 0}
+      .cd-blank{display:inline-block;min-width:100px;border-bottom:1.5px solid #0B1E2D;padding:0 6px 1px;font-weight:700;text-align:center}
+      .cd-terms{margin:0;padding-inline-start:20px;font-size:13px;color:#4A6E88;line-height:2}
+      .cd-sign{display:flex;justify-content:space-between;gap:20px;margin-top:30px}
+      .cd-sign div{flex:1;text-align:center;padding-top:34px;border-top:1px solid #0B1E2D;font-size:12.5px;color:#4A6E88}
+    </style></head><body>${bodyHtml}
+    <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`);
+  w.document.close();
+}
+function printPledgeSample(){
+  openPrintWindow("تعهد خطي — نموذج", pledgeBodyHtml({
+    buyerName:"[ اسم المشتري ]", buyerWa:"[ رقم الهاتف ]", buyerAddress:"[ العنوان ]",
+    product:"[ اسم السلعة ]", total:"[ المبلغ ]", months:"[ عدد الأشهر ]", monthly:"[ القسط الشهري ]",
+    code:"[ كود المشترك ]", date:"[     /     /2026     ]"
+  }));
+}
+function printPledge(subId){
+  const sub = state.subs.find(s=>s.id===subId);
+  if(!sub) return;
+  const el = document.getElementById("pledgeEdit-"+subId);
+  const html = el ? el.innerHTML : (sub.pledgeText || pledgeDocHtml(sub));
+  openPrintWindow("تعهد خطي — " + sub.name, html);
+}
+
+/* ─── السند لأمر (كمبيالة) القابل للطباعة ─── */
+function sanadBodyHtml(d){
+  return `
+    <div style="text-align:center;font-weight:900;font-size:18px;color:var(--sky1);margin-bottom:6px">سند لأمر (كمبيالة)</div>
+    <div style="text-align:center;font-size:11px;color:var(--sub);margin-bottom:16px">Promissory Note</div>
+    <p class="cd-line">رقم السند: <span class="cd-blank">${esc(d.sanadNo||"—")}</span> &nbsp;&nbsp; تاريخ التحرير: <span class="cd-blank">${esc(d.date)}</span></p>
+    <p class="cd-line">المبلغ: <span class="cd-blank">${typeof d.total==="number"?fmt(d.total, d.currency):esc(d.total)}</span></p>
+    <p class="cd-line">بموجب هذا السند، أتعهد أنا الموقّع أدناه السيد/ة <span class="cd-blank">${esc(d.buyerName)}</span> بأن أدفع لأمر شركة <b>قسطني للتسويق والتقسيط</b> أو لمن يحمل هذا السند بصفة قانونية، وبدون قيد أو شرط، مبلغاً وقدره <span class="cd-blank">${typeof d.total==="number"?fmt(d.total, d.currency):esc(d.total)}</span> لا غير.</p>
+    <p class="cd-line">وذلك استحقاقاً بتاريخ <span class="cd-blank">${esc(d.dueDate||"—")}</span>، وهذا المبلغ يمثل باقي قيمة الأقساط المستحقة عن السلعة المبينة أدناه، والمشتراة من شركة قسطني بنظام البيع بالتقسيط، ويحل هذا السند محل كافة الأقساط المتبقية عند التوقف عن السداد أو الإخلال بشروط عقد الشراء بالتقسيط الموقّع بين الطرفين.</p>
+    <div style="background:var(--skyBg);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13.5px;line-height:2">
+      <div>السلعة: <b>${esc(d.product)}</b></div>
+      <div>كود المشترك: <b>${esc(d.code)}</b></div>
+      <div>رقم هاتف المدين: <b>${esc(d.buyerWa)}</b></div>
+    </div>
+    <p class="cd-line">الكفيل الضامن لهذا السند: <span class="cd-blank">${esc(d.guarantorName||"—")}</span> — هاتف الكفيل: <span class="cd-blank">${esc(d.guarantorPhone||"—")}</span></p>
+    <p class="cd-line" style="margin-top:10px">ويقر الموقّع أدناه بأن هذا السند صحيح ونافذ اعتباراً من تاريخه، وأنه غير قابل للطعن أو الاعتراض، وأنه على علم تام بالمسؤولية القانونية المترتبة على عدم الوفاء بقيمته في تاريخ الاستحقاق المحدد أعلاه، ويحق لحامل السند اتخاذ كافة الإجراءات القانونية والتنفيذية بحقه وبحق الكفيل الضامن.</p>
+    <div class="cd-sign">
+      <div>توقيع المدين (المشتري)<br>${esc(d.buyerName)}</div>
+      <div>توقيع الكفيل<br>${esc(d.guarantorName||"—")}</div>
+      <div>توقيع ممثل الشركة</div>
+    </div>
+    <p style="text-align:center;font-size:11px;color:var(--orange);margin-top:16px">ملاحظة: لضمان أقصى قوة قانونية وتنفيذية لهذا السند، يُفضّل تصديقه أمام كاتب العدل المختص.</p>`;
+}
+function sanadDocHtml(sub){
+  return sanadBodyHtml({
+    sanadNo: sub.code, buyerName: sub.name, buyerWa: sub.wa,
+    product: sub.product||"—", total: sub.total-(sub.paid||0), code: sub.code, currency: sub.currency,
+    dueDate: sub.next?fmtDateAr(sub.next):"—", date: todayISO(),
+    guarantorName: sub.guarantorName||GUARANTOR_NAME, guarantorPhone: sub.guarantorPhone||""
+  });
+}
+function printSanadSample(){
+  openPrintWindow("سند لأمر — نموذج", sanadBodyHtml({
+    sanadNo:"[      ]", buyerName:"[ اسم المدين / المشتري ]", buyerWa:"[ رقم الهاتف ]",
+    product:"[ اسم السلعة ]", total:"[ المبلغ ]", code:"[      ]",
+    dueDate:"[     /     / 2026     ]", date:"[     /     / 2026     ]",
+    guarantorName:"[ اسم الكفيل ]", guarantorPhone:"[ رقم هاتف الكفيل ]"
+  }));
+}
+function printSanad(subId){
+  const sub = state.subs.find(s=>s.id===subId);
+  if(!sub) return;
+  const el = document.getElementById("sanadEdit-"+subId);
+  const html = el ? el.innerHTML : (sub.sanadText || sanadDocHtml(sub));
+  openPrintWindow("سند لأمر — " + sub.name, html);
+}
+function saveEditableDoc(subId, field, el){
+  const i = state.subs.findIndex(s=>s.id===subId);
+  if(i<0) return;
+  state.subs[i][field] = el.innerHTML;
+  saveState();
 }
 function ensureInstallments(sub){
   const n = sub.months||0;
@@ -445,7 +542,7 @@ function ledgerTableHtml(sub){
       <td><input type="text" value="${esc(it.payer||sub.name)}" onchange="updateInstallment('${sub.id}',${it.n},'payer',this.value)" style="width:96px;text-align:center;padding:5px 3px;font-size:11px;border:1px solid var(--border);border-radius:6px"></td>
       <td><input type="date" value="${it.date||''}" onchange="updateInstallment('${sub.id}',${it.n},'date',this.value)" style="width:118px;padding:5px 3px;font-size:11px;border:1px solid var(--border);border-radius:6px"></td>
       <td><input type="number" value="${it.amount||''}" onchange="updateInstallment('${sub.id}',${it.n},'amount',this.value)" style="width:90px;text-align:center;padding:5px 3px;font-size:11px;border:1px solid var(--border);border-radius:6px"></td>
-      <td style="font-weight:700">${fmt(remaining)}</td>
+      <td style="font-weight:700">${fmt(remaining, sub.currency)}</td>
       <td><select onchange="updateInstallment('${sub.id}',${it.n},'status',this.value)" style="padding:5px 3px;font-size:11px;border:1px solid var(--border);border-radius:6px;font-weight:700;color:${it.status==='paid'?'var(--green)':'var(--orange)'}">
         <option value="pending" ${it.status!=="paid"?"selected":""}>⏳ قيد الانتظار</option>
         <option value="paid" ${it.status==="paid"?"selected":""}>✅ تم التسديد</option>
@@ -454,13 +551,39 @@ function ledgerTableHtml(sub){
   }).join("");
   return `
     <div style="font-weight:800;margin-top:22px;margin-bottom:8px;color:var(--sky1)">جدول التسديد <span style="font-weight:400;font-size:11px;color:var(--sub)">(قابل للتعديل من الإدارة)</span></div>
-    <p class="cd-line" style="font-size:13px">المبلغ الباقي في ذمة المشتري دون المقدمة <span class="cd-blank">${fmt(excludingDown)}</span></p>
+    <p class="cd-line" style="font-size:13px">المبلغ الباقي في ذمة المشتري دون المقدمة <span class="cd-blank">${fmt(excludingDown, sub.currency)}</span></p>
     <div style="overflow-x:auto">
-    <table class="ledger-table">
+    <table class="ledger-table" id="ledgerTable-${sub.id}">
       <thead><tr><th>ت</th><th>المُستلم</th><th>المُسلم</th><th>تاريخ التسليم</th><th>المبلغ الواصل</th><th>الباقي الكلي</th><th>حالة التسديد</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     </div>`;
+}
+function ledgerAsText(sub){
+  ensureInstallments(sub);
+  const excludingDown = Math.max(0, sub.total - (sub.downPayment||0));
+  let cum = 0;
+  const lines = sub.installments.map(it=>{
+    if(it.status==="paid") cum += Number(it.amount)||0;
+    const remaining = Math.max(0, excludingDown - cum);
+    const statusTxt = it.status==="paid" ? "✅ مدفوع" : "⏳ لم يُسدد بعد";
+    const dateTxt = it.date ? fmtDateAr(it.date) : "—";
+    return `${it.n}) بتاريخ ${dateTxt} — المبلغ: ${fmt(it.amount||0, sub.currency)} — المتبقي بعده: ${fmt(remaining, sub.currency)} — ${statusTxt}`;
+  }).join("\n");
+  return `📅 جدول تسديد أقساطك — شركة قسطني\nالمشترك: ${sub.name} (${sub.code})\nالسلعة: ${sub.product||"—"}\nالإجمالي: ${fmt(sub.total, sub.currency)}\n\n${lines}\n\nلأي استفسار تواصل معنا على واتساب: ${SUPPORT_WA_DISPLAY}`;
+}
+function printLedger(subId){
+  const sub = state.subs.find(s=>s.id===subId);
+  if(!sub) return;
+  const title = `جدول تسديد — ${sub.name}`;
+  const head = `<div style="text-align:center;font-weight:900;font-size:18px;color:#073B5C;margin-bottom:4px">قسطني</div>
+    <div style="text-align:center;font-size:12px;color:#4A6E88;margin-bottom:18px">${esc(title)} — كود ${esc(sub.code)}</div>`;
+  openPrintWindow(title, head + ledgerTableHtml(sub));
+}
+function sendLedgerWhatsApp(subId){
+  const sub = state.subs.find(s=>s.id===subId);
+  if(!sub) return;
+  window.open(waHref(sub.wa, ledgerAsText(sub)), "_blank");
 }
 function docThumbHtml(label, dataUrl){
   return `<div class="doc-preview">${dataUrl?`<img src="${dataUrl}" alt="${label}">`:label}</div>`;
@@ -509,7 +632,7 @@ function renderHome(){
     <div class="card" style="margin-bottom:24px">
       <div style="font-weight:800;margin-bottom:14px;color:var(--sky1);font-size:15px">📄 نموذج عقد الشراء بالتقسيط <span style="font-weight:400;font-size:12px;color:var(--sub)">(للاطلاع فقط)</span></div>
       <div class="cd-line">اني السيد <span class="cd-blank">[ اسم المشتري ]</span> اشتريت <span class="cd-blank">[ اسم المنتج ]</span></div>
-      <div class="cd-line">بكفالة من السيد <span class="cd-blank">[     ]</span></div>
+      <div class="cd-line">بكفالة من السيد <span class="cd-blank">[ اسم الكفيل ]</span></div>
       <div class="cd-line">وكان سعره نقداً <span class="cd-blank">[     ]</span> دينار</div>
       <div class="cd-line">وقبلت شراءه بمبلغ <span class="cd-blank">[     ]</span> دينار قسطاً</div>
       <div class="cd-line">بمقدمة <span class="cd-blank">[     ]</span> دينار والباقي <span class="cd-blank">[     ]</span> قسطاً</div>
@@ -546,7 +669,7 @@ function renderHome(){
             <div class="cat">${esc(p.cat)}</div>
             <div class="name">${esc(p.name)}</div>
             <div class="row">
-              <span class="badge badge-green">💵 نقداً ${fmt(p.price)}</span>
+              <span class="badge badge-green">💵 نقداً ${fmt(p.price, p.currency)}</span>
               <span style="color:var(--sky2);font-size:12px;font-weight:700">التفاصيل ←</span>
             </div>
           </div>
@@ -560,7 +683,7 @@ function openProductModal(id){ modalProduct = state.products.find(p=>p.id===id);
 function closeProductModal(){ modalProduct = null; render(); }
 function renderProductModal(){
   const p = modalProduct;
-  const plans = [4,8,10,12].map(m=>{
+  const plans = [4,8,10,12,18].map(m=>{
     const pct = state.markup[m]||0;
     const tot = p.price*(1+pct/100);
     return {m, tot, mo: tot/m, pct};
@@ -576,7 +699,7 @@ function renderProductModal(){
         <p style="color:var(--sub);line-height:1.8;font-size:13px;margin-bottom:16px">${esc(p.desc)}</p>
         <div style="background:var(--skyBg);border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
           <span style="color:var(--sub)">السعر نقداً</span>
-          <span style="color:var(--sky1);font-weight:900;font-size:20px">${fmt(p.price)}</span>
+          <span style="color:var(--sky1);font-weight:900;font-size:20px">${fmt(p.price, p.currency)}</span>
         </div>
         <div style="font-weight:800;margin-bottom:10px">خطط التقسيط المتاحة:</div>
         <div style="display:grid;gap:8px">
@@ -584,9 +707,9 @@ function renderProductModal(){
             <div style="display:flex;justify-content:space-between;align-items:center;background:var(--skyBg);border-radius:11px;padding:11px 15px;border:1px solid var(--border)">
               <div>
                 <div style="font-weight:800;font-size:14px">${pl.m} أشهر <span style="color:var(--sub);font-weight:400;font-size:12px">(${pl.pct}% زيادة)</span></div>
-                <div style="font-size:11px;color:var(--sub)">الإجمالي: ${fmt(pl.tot)}</div>
+                <div style="font-size:11px;color:var(--sub)">الإجمالي: ${fmt(pl.tot, p.currency)}</div>
               </div>
-              <span class="badge badge-sky">💰 ${fmt(pl.mo)}/شهر</span>
+              <span class="badge badge-sky">💰 ${fmt(pl.mo, p.currency)}/شهر</span>
             </div>`).join("")}
         </div>
       </div>
@@ -598,10 +721,18 @@ function renderProductModal(){
 function renderCalc(){
   return `
     <div style="max-width:620px;margin:0 auto">
-      <div class="page-title"><h2>🧮 احسب سعر الأقساط</h2><p>أدخل السعر النقدي لمعرفة خطط التقسيط الأربع فوراً</p></div>
+      <div class="page-title"><h2>🧮 احسب سعر الأقساط</h2><p>أدخل السعر النقدي لمعرفة خطط التقسيط فوراً</p></div>
       <div class="card">
-        <div class="fld"><label>السعر النقدي للسلعة (د.ع)</label>
-          <input type="text" id="calcPrice" placeholder="مثال: 850000" oninput="renderCalcResult()">
+        <div class="grid2">
+          <div class="fld"><label>السعر النقدي للسلعة</label>
+            <input type="text" id="calcPrice" placeholder="مثال: 850000" oninput="renderCalcResult()">
+          </div>
+          <div class="fld"><label>العملة</label>
+            <select id="calcCurrency" onchange="renderCalcResult()">
+              <option value="IQD">دينار عراقي (د.ع)</option>
+              <option value="USD">دولار أمريكي ($)</option>
+            </select>
+          </div>
         </div>
         <div id="calcResult"></div>
       </div>
@@ -610,19 +741,20 @@ function renderCalc(){
 function renderCalcResult(){
   const raw = document.getElementById("calcPrice").value.replace(/\D/g,"");
   const n = Number(raw)||0;
+  const currency = document.getElementById("calcCurrency").value;
   const box = document.getElementById("calcResult");
   if (n<=0){ box.innerHTML=""; return; }
-  const plans = [4,8,10,12].map(m=>{ const pct=state.markup[m]||0; const tot=n*(1+pct/100); return {m, tot, mo: tot/m, pct}; });
+  const plans = [4,8,10,12,18].map(m=>{ const pct=state.markup[m]||0; const tot=n*(1+pct/100); return {m, tot, mo: tot/m, pct}; });
   box.innerHTML = `
     <div style="background:var(--skyBg);border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between">
-      <span style="color:var(--sub)">السعر النقدي</span><span style="color:var(--green);font-weight:900;font-size:18px">${fmt(n)}</span>
+      <span style="color:var(--sub)">السعر النقدي</span><span style="color:var(--green);font-weight:900;font-size:18px">${fmt(n, currency)}</span>
     </div>
     <div style="display:grid;gap:9px">
       ${plans.map(pl=>`
         <div style="background:var(--white);border:1.5px solid var(--border);border-radius:13px;padding:13px 17px;display:flex;justify-content:space-between;align-items:center">
           <div><div style="font-weight:800;font-size:15px;color:var(--sky1)">${pl.m} أشهر</div>
-          <div style="font-size:12px;color:var(--sub);margin-top:3px">إجمالي: ${fmt(pl.tot)} | زيادة ${pl.pct}%</div></div>
-          <div style="text-align:left"><div style="font-weight:900;font-size:17px">${fmt(pl.mo)}</div><div style="font-size:11px;color:var(--sub)">شهرياً</div></div>
+          <div style="font-size:12px;color:var(--sub);margin-top:3px">إجمالي: ${fmt(pl.tot, currency)} | زيادة ${pl.pct}%</div></div>
+          <div style="text-align:left"><div style="font-weight:900;font-size:17px">${fmt(pl.mo, currency)}</div><div style="font-size:11px;color:var(--sub)">شهرياً</div></div>
         </div>`).join("")}
     </div>`;
 }
@@ -665,9 +797,9 @@ function doLookup(){
         <div style="background:var(--skyBg);height:9px;border-radius:99px;overflow:hidden"><div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--sky3),var(--sky1))"></div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
-        <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">الإجمالي</div><div style="font-weight:900;font-size:17px">${fmt(s.total)}</div></div>
-        <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">المدفوع</div><div style="font-weight:900;font-size:17px;color:var(--green)">${fmt(s.paid)}</div></div>
-        <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">المتبقي</div><div style="font-weight:900;font-size:17px;color:var(--red)">${fmt(rem)}</div></div>
+        <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">الإجمالي</div><div style="font-weight:900;font-size:17px">${fmt(s.total, s.currency)}</div></div>
+        <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">المدفوع</div><div style="font-weight:900;font-size:17px;color:var(--green)">${fmt(s.paid, s.currency)}</div></div>
+        <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">المتبقي</div><div style="font-weight:900;font-size:17px;color:var(--red)">${fmt(rem, s.currency)}</div></div>
         <div style="background:var(--skyBg);border-radius:11px;padding:11px 13px;border:1px solid var(--border)"><div style="font-size:11px;color:var(--sub);margin-bottom:3px">الأشهر المتبقية</div><div style="font-weight:900;font-size:17px;color:var(--orange)">${ml} شهر</div></div>
       </div>
       <div style="margin-top:12px;font-size:13px;color:var(--sub);display:flex;gap:6px;align-items:center;padding:9px 13px;background:var(--skyBg);border-radius:9px">📅 تاريخ الاستحقاق القادم: <b style="color:var(--sky1)">${esc(s.next)}</b></div>
@@ -717,17 +849,11 @@ function submitFinancing(){
   if(!name||!wa||!item||!price||!loc) return;
   state.financing.unshift({id:"f"+Date.now(), name, wa, item, price, loc, status:"pending", reason:""});
   saveState();
-  const notifyMsg = `📥 طلب تمويل جديد — قسطني\nالاسم: ${name}\nرقم الواتساب: ${wa}\nالسلعة: ${item}\nالسعر: ${fmt(price)}\nالموقع: ${loc}`;
-  const notifyLink = `https://wa.me/${WA_NUM}?text=${encodeURIComponent(notifyMsg)}`;
-  window.open(notifyLink, "_blank");
   document.getElementById("financingWrap").innerHTML = `
     <div class="card" style="padding:34px;text-align:center">
       <div style="font-size:52px;margin-bottom:12px">✅</div>
       <h3 style="font-size:18px;font-weight:900;margin-bottom:8px">تم إرسال طلبك بنجاح!</h3>
       <p style="color:var(--sub);line-height:1.8;font-size:14px;margin-bottom:20px">وصل طلبك للإدارة. سيتواصلون معك على واتساب <b>${esc(wa)}</b> بالقبول أو الرفض.</p>
-      <p style="color:var(--sub);font-size:12px;margin-bottom:14px">إذا لم تفتح صفحة واتساب تلقائياً، اضغط الزر أدناه لإرسال الطلب للإدارة مباشرةً</p>
-      <a class="btn btn-wa" href="${notifyLink}" target="_blank" style="display:inline-block;margin-bottom:10px">📲 إرسال إشعار للإدارة عبر واتساب</a>
-      <br>
       <button class="btn btn-outline" onclick="goTab('financing')">إرسال طلب آخر</button>
     </div>`;
 }
@@ -786,7 +912,7 @@ function renderAdminLogin(){
 }
 function doAdminLogin(){
   const p = document.getElementById("adminPass").value;
-  if (p === (state.adminPass||ADMIN_PASS)){ authed = true; adminSec="dash"; render(); }
+  if (p === ADMIN_PASS){ authed = true; adminSec="dash"; render(); }
   else {
     document.getElementById("adminErr").innerHTML = `<div style="color:var(--red);font-size:13px;margin-top:8px">كلمة المرور غير صحيحة</div>`;
   }
@@ -857,7 +983,11 @@ function renderAProducts(){
         <div class="grid2">
           <div class="fld"><label>الاسم</label><input type="text" id="apName" value="${editing?esc(editing.name):''}"></div>
           <div class="fld"><label>التصنيف</label><input type="text" id="apCat" value="${editing?esc(editing.cat):''}"></div>
-          <div class="fld"><label>السعر (د.ع)</label><input type="number" id="apPrice" value="${editing?editing.price:''}"></div>
+          <div class="fld"><label>العملة</label><select id="apCurrency">
+            <option value="IQD" ${(!editing||editing.currency!=='USD')?'selected':''}>دينار عراقي (د.ع)</option>
+            <option value="USD" ${editing&&editing.currency==='USD'?'selected':''}>دولار أمريكي ($)</option>
+          </select></div>
+          <div class="fld"><label>السعر</label><input type="number" id="apPrice" value="${editing?editing.price:''}"></div>
           <div class="fld"><label>رابط الصورة</label><input type="text" id="apImg" value="${editing?esc(editing.img):''}" placeholder="https://..."></div>
         </div>
         <div class="fld"><label>الوصف</label><textarea id="apDesc" rows="3">${editing?esc(editing.desc):''}</textarea></div>
@@ -871,7 +1001,7 @@ function renderAProducts(){
         <div>${state.products.map(p=>`
           <div class="list-row">
             <img src="${esc(p.img)}">
-            <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</div><div style="font-size:11px;color:var(--sub)">${esc(p.cat)} — ${fmt(p.price)}</div></div>
+            <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</div><div style="font-size:11px;color:var(--sub)">${esc(p.cat)} — ${fmt(p.price, p.currency)}</div></div>
             <button class="icon-btn" onclick="editProduct('${p.id}')">✏️</button>
             <button class="icon-btn" onclick="deleteProduct('${p.id}')">🗑️</button>
           </div>`).join("")}</div>
@@ -882,14 +1012,14 @@ function saveProduct(){
   const name=document.getElementById("apName").value.trim();
   const price=Number(document.getElementById("apPrice").value);
   if(!name||!price) return;
-  const data={ name, cat:document.getElementById("apCat").value.trim(), price, img:document.getElementById("apImg").value.trim(), desc:document.getElementById("apDesc").value.trim() };
+  const data={ name, cat:document.getElementById("apCat").value.trim(), price, currency:document.getElementById("apCurrency").value, img:document.getElementById("apImg").value.trim(), desc:document.getElementById("apDesc").value.trim() };
   if (editingProductId){ const i=state.products.findIndex(p=>p.id===editingProductId); state.products[i]={...state.products[i], ...data}; editingProductId=null; }
   else state.products.push({...data, id:"p"+Date.now()});
   saveState(); render();
 }
 function editProduct(id){ editingProductId=id; render(); }
 function cancelEditProduct(){ editingProductId=null; render(); }
-function deleteProduct(id){ state.products=state.products.filter(p=>p.id!==id); saveState(); render(); }
+function deleteProduct(id){ const p=state.products.find(x=>x.id===id); if(!confirm(`هل انت متأكد من حذف المنتج "${p?p.name:""}"؟\nلا يمكن التراجع بعد الحذف.`)) return; state.products=state.products.filter(p=>p.id!==id); saveState(); render(); }
 
 function renderASubs(){
   const editing = state.subs.find(s=>s.id===editingSubId);
@@ -901,15 +1031,19 @@ function renderASubs(){
           <div class="fld"><label>الكود</label><input type="text" id="asCode" value="${editing?esc(editing.code):''}" placeholder="QST-1001"></div>
           <div class="fld"><label>الاسم الكامل</label><input type="text" id="asName" value="${editing?esc(editing.name):''}"></div>
           <div class="fld"><label>رقم الواتساب</label><input type="text" id="asWa" value="${editing?esc(editing.wa):''}"></div>
-          <div class="fld"><label>المنتج</label><select id="asProduct">
-            <option value="">اختر منتج</option>
-            ${state.products.map(p=>`<option value="${esc(p.name)}" ${editing&&editing.product===p.name?'selected':''}>${esc(p.name)}</option>`).join("")}
+          <div class="fld"><label>المنتج (اكتب أي اسم أو اختر من القائمة)</label>
+            <input type="text" id="asProduct" list="productsDatalist" value="${editing?esc(editing.product):''}" placeholder="اكتب اسم المنتج">
+            <datalist id="productsDatalist">${state.products.map(p=>`<option value="${esc(p.name)}">`).join("")}</datalist>
+          </div>
+          <div class="fld"><label>العملة</label><select id="asCurrency">
+            <option value="IQD" ${(!editing||editing.currency!=='USD')?'selected':''}>دينار عراقي (د.ع)</option>
+            <option value="USD" ${editing&&editing.currency==='USD'?'selected':''}>دولار أمريكي ($)</option>
           </select></div>
-          <div class="fld"><label>الإجمالي (د.ع)</label><input type="number" id="asTotal" value="${editing?editing.total:''}"></div>
+          <div class="fld"><label>الإجمالي</label><input type="number" id="asTotal" value="${editing?editing.total:''}"></div>
           <div class="fld"><label>عدد الأشهر</label><select id="asMonths">
-            ${[4,8,10,12].map(m=>`<option value="${m}" ${editing&&editing.months==m?'selected':''}>${m} أشهر</option>`).join("")}
+            ${[4,8,10,12,18].map(m=>`<option value="${m}" ${editing&&editing.months==m?'selected':''}>${m} أشهر${m===18?' (زيادة 50%)':''}</option>`).join("")}
           </select></div>
-          <div class="fld"><label>المدفوع (د.ع)</label><input type="number" id="asPaid" value="${editing?editing.paid:''}"></div>
+          <div class="fld"><label>المدفوع</label><input type="number" id="asPaid" value="${editing?editing.paid:''}"></div>
           <div class="fld"><label>تاريخ الاستحقاق القادم</label><input type="date" id="asNext" value="${editing?editing.next:''}"></div>
           <div class="fld"><label>اسم الكفيل</label><input type="text" id="asGName" value="${editing&&editing.guarantorName?esc(editing.guarantorName):''}" placeholder="${GUARANTOR_NAME}"></div>
           <div class="fld"><label>رقم هاتف الكفيل</label><input type="text" id="asGPhone" value="${editing&&editing.guarantorPhone?esc(editing.guarantorPhone):''}" placeholder="07xxxxxxxxx"></div>
@@ -932,8 +1066,8 @@ function renderASubs(){
               <div style="display:flex;gap:4px"><button class="icon-btn" onclick="editSub('${s.id}')">✏️</button><button class="icon-btn" onclick="deleteSub('${s.id}')">🗑️</button></div>
             </div>
             <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-              <span class="badge badge-green">مدفوع ${fmt(s.paid)}</span>
-              <span class="badge badge-red">متبقي ${fmt(s.total-s.paid)}</span>
+              <span class="badge badge-green">مدفوع ${fmt(s.paid, s.currency)}</span>
+              <span class="badge badge-red">متبقي ${fmt(s.total-s.paid, s.currency)}</span>
               <span class="badge badge-sky">${s.months} شهر</span>
               ${status==="قريب"?`<span class="badge badge-orange">🔔 استحقاق خلال يومين</span>`:""}
               ${status==="متأخر"?`<span class="badge badge-red">⚠️ متأخر عن السداد</span>`:""}
@@ -948,6 +1082,7 @@ function saveSub(){
   const name=document.getElementById("asName").value.trim();
   if(!code||!name) return;
   const data={ code, name, wa:document.getElementById("asWa").value.trim(), product:document.getElementById("asProduct").value,
+    currency:document.getElementById("asCurrency").value,
     total:Number(document.getElementById("asTotal").value)||0, months:Number(document.getElementById("asMonths").value),
     paid:Number(document.getElementById("asPaid").value)||0, next:document.getElementById("asNext").value,
     guarantorName:document.getElementById("asGName").value.trim(), guarantorPhone:document.getElementById("asGPhone").value.trim() };
@@ -957,7 +1092,7 @@ function saveSub(){
 }
 function editSub(id){ editingSubId=id; render(); }
 function cancelEditSub(){ editingSubId=null; render(); }
-function deleteSub(id){ state.subs=state.subs.filter(s=>s.id!==id); saveState(); render(); }
+function deleteSub(id){ const s=state.subs.find(x=>x.id===id); if(!confirm(`هل انت متأكد من حذف المشترك "${s?s.name:""}" (${s?s.code:""})؟\nسيتم حذف كل بياناته وسجل أقساطه ولا يمكن التراجع بعد الحذف.`)) return; state.subs=state.subs.filter(s=>s.id!==id); saveState(); render(); }
 
 function renderAContract(){
   const sub = state.subs.find(s=>s.id===contractSelSubId);
@@ -974,6 +1109,10 @@ function renderAContract(){
       <div class="card">
         <div style="font-weight:800;margin-bottom:14px;font-size:15px">✏️ بيانات العقد</div>
         <div class="grid2">
+          <div class="fld"><label>العملة</label><select id="cdCurrency">
+            <option value="IQD" ${(!sub.currency||sub.currency!=='USD')?'selected':''}>دينار عراقي (د.ع)</option>
+            <option value="USD" ${sub.currency==='USD'?'selected':''}>دولار أمريكي ($)</option>
+          </select></div>
           <div class="fld"><label>السعر نقداً (اختياري)</label><input type="number" id="cdCashPrice" value="${sub.cashPrice||''}"></div>
           <div class="fld"><label>الدفعة الأولى</label><input type="number" id="cdDown" value="${sub.downPayment||''}"></div>
           <div class="fld"><label>تاريخ الدفعة الأولى</label><input type="date" id="cdDownDate" value="${sub.downPaymentDate||''}"></div>
@@ -994,18 +1133,39 @@ function renderAContract(){
         </div>
       </div>
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px" class="no-print">
-          <div style="font-weight:800;font-size:15px">📃 عقد الشراء المُعبّأ</div>
-          <button class="btn btn-outline sm" onclick="window.print()">🖨 طباعة</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px" class="no-print">
+          <div style="font-weight:800;font-size:15px">📃 عقد الشراء المُعبّأ وجدول التسديد</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-outline sm" onclick="window.print()">🖨 طباعة العقد</button>
+            <button class="btn btn-outline sm" onclick="printLedger('${sub.id}')">🖨 طباعة الجدول فقط</button>
+            <button class="btn btn-wa sm" onclick="sendLedgerWhatsApp('${sub.id}')">📤 إرسال الجدول للمشترك</button>
+          </div>
         </div>
         ${contractDocHtml(sub)}
         ${ledgerTableHtml(sub)}
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-weight:800;font-size:15px">📝 التعهد الخطي</div>
+          <button class="btn btn-outline sm" onclick="printPledge('${sub.id}')">🖨 طباعة التعهد</button>
+        </div>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:10px">تعهد خطي معبّأ ببيانات هذا المشترك تلقائياً — اضغط داخل النص وعدّله كيفما تريد، التعديلات تُحفظ تلقائياً، ثم اضغط الزر لطباعته.</div>
+        <div id="pledgeEdit-${sub.id}" class="contract-paper" contenteditable="true" onblur="saveEditableDoc('${sub.id}','pledgeText',this)">${sub.pledgeText || pledgeDocHtml(sub)}</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-weight:800;font-size:15px">📜 السند لأمر (كمبيالة)</div>
+          <button class="btn btn-outline sm" onclick="printSanad('${sub.id}')">🖨 طباعة السند</button>
+        </div>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:10px">سند لأمر معبّأ ببيانات هذا المشترك — قابل للتعديل مباشرة قبل الطباعة (يُفضّل تصديقه لاحقاً أمام كاتب العدل).</div>
+        <div id="sanadEdit-${sub.id}" class="contract-paper" contenteditable="true" onblur="saveEditableDoc('${sub.id}','sanadText',this)">${sub.sanadText || sanadDocHtml(sub)}</div>
       </div>`}
     </div>`;
 }
 function saveSubContract(){
   const sub = state.subs.find(s=>s.id===contractSelSubId);
   if(!sub) return;
+  sub.currency = document.getElementById("cdCurrency").value;
   sub.cashPrice = Number(document.getElementById("cdCashPrice").value)||0;
   sub.downPayment = Number(document.getElementById("cdDown").value)||0;
   sub.downPaymentDate = document.getElementById("cdDownDate").value;
@@ -1037,7 +1197,7 @@ function renderAMsgs(){
   const rcptDate = sub ? (document.getElementById("rcptDate")?.value || todayISO()) : todayISO();
   const remainingAfter = sub ? Math.max(0, sub.total - sub.paid) : 0;
   const templates = {
-    remind: sub ? `السلام عليكم\n${sub.name}، يسعدنا انضمامك الى قسطني .\nنود تذكيرك بأن موعد استحقاق القسط القادم\nهو يوم ${arabicWeekday(sub.next)} المصادف ${fmtDateAr(sub.next)}، وقيمة القسط ${fmt(monthly)}.\nلضمان استمرار الخدمة وتجنب أي غرامات تأخير، يمكنك سداد القسط كاش عن طريق الكفيل [ ${guarantorName} ] او إلكترونياً بكل سهولة وأمان عبر ماستر كارد الرافدين\n[ ${MASTERCARD_NUMBER} ]\nفي حال وجود أي استفسار أو لطلب المساعدة،\nفريقنا جاهز لخدمتك عبر:\nواتساب: [ ${SUPPORT_WA_DISPLAY} ]\n(إذا قمت بالسداد مؤخراً، يرجى تجاهل هذه الرسالة).\nقسطني .` : "اختر مشتركاً أولاً لتوليد رسالة التذكير الخاصة به.",
+    remind: sub ? `السلام عليكم\n${sub.name}، يسعدنا انضمامك الى قسطني .\nنود تذكيرك بأن موعد استحقاق القسط القادم\nهو يوم ${arabicWeekday(sub.next)} المصادف ${fmtDateAr(sub.next)}، وقيمة القسط ${fmt(monthly, sub.currency)}.\nلضمان استمرار الخدمة وتجنب أي غرامات تأخير، يمكنك سداد القسط كاش عن طريق الكفيل [ ${guarantorName} ] او إلكترونياً بكل سهولة وأمان عبر ماستر كارد الرافدين\n[ ${MASTERCARD_NUMBER} ]\nفي حال وجود أي استفسار أو لطلب المساعدة،\nفريقنا جاهز لخدمتك عبر:\nواتساب: [ ${SUPPORT_WA_DISPLAY} ]\n(إذا قمت بالسداد مؤخراً، يرجى تجاهل هذه الرسالة).\nقسطني .` : "اختر مشتركاً أولاً لتوليد رسالة التذكير الخاصة به.",
     warn: `تنبيه هام من شركة ${state.info.name} ⚠️\nعزيزنا ${sub?sub.name:"العميل الكريم"}،\nمر وقت على موعد استحقاق قسط (${sub?sub.product:"..."}) ولم نستلم الدفعة بعد.\nنرجو المبادرة بالتسديد لتجنب أي إجراءات.\nللتواصل: ${WA_NUM.replace("964","0")}`,
     receipt: sub ? `مرحباً ${sub.name}،\nنؤكد لكم في قسطني استلام مبلغ وقدره ${fmt(Number(rcptAmount)||0)} بتاريخ ${fmtDateAr(rcptDate)}.\nبناءً عليه، أصبح الرصيد المتبقي من القسط هو ${fmt(remainingAfter)}.\nنشكر لكم التزامكم. في حال كان لديكم أي استفسار، لا تترددوا في التواصل معنا عبر الواتساب [ ${SUPPORT_WA_DISPLAY} ].\nشكراً لثقتكم بنا.\nقسطني .` : "اختر مشتركاً أولاً لتوليد إيصال الاستلام.",
     welcome: autoReplyText(),
@@ -1144,7 +1304,7 @@ function addPartner(){
   state.partners.push({id:"c"+Date.now(), name, field});
   saveState(); render();
 }
-function deletePartner(id){ state.partners=state.partners.filter(p=>p.id!==id); saveState(); render(); }
+function deletePartner(id){ const p=state.partners.find(x=>x.id===id); if(!confirm(`هل انت متأكد من حذف الشركة "${p?p.name:""}"؟`)) return; state.partners=state.partners.filter(p=>p.id!==id); saveState(); render(); }
 
 function renderAPricing(){
   return `
@@ -1152,7 +1312,7 @@ function renderAPricing(){
       <div style="font-weight:800;margin-bottom:6px;font-size:15px">💹 نسب زيادة الأقساط</div>
       <p style="font-size:13px;color:var(--sub);margin-bottom:18px">حدد نسبة الزيادة % لكل مدة — يمكن جعلها 0%. التغيير فوري بكل الموقع.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:13px">
-        ${[4,8,10,12].map(m=>`
+        ${[4,8,10,12,18].map(m=>`
           <div style="border:1.5px solid var(--border);border-radius:13px;padding:16px;text-align:center;background:var(--skyBg)">
             <div style="font-weight:900;color:var(--sky1);font-size:16px;margin-bottom:10px">⏱ ${m} أشهر</div>
             <input type="number" value="${state.markup[m]}" oninput="updateMarkup(${m}, this.value)" style="text-align:center;font-weight:800;font-size:16px">
@@ -1208,38 +1368,7 @@ function renderASettings(){
       </div>
       ${useFirebase?`<div style="margin-top:16px;font-size:12px;color:var(--green)">✅ متصل بـ Firebase — البيانات تُحفظ وتُزامن بين جميع الأجهزة</div>`
       :`<div style="margin-top:16px;font-size:12px;color:var(--orange)">⚠️ غير متصل بـ Firebase حالياً — البيانات تُحفظ محلياً بهذا المتصفح فقط. راجع تعليمات الإعداد بأعلى الكود.</div>`}
-    </div>
-    <div class="card" style="margin-top:16px">
-      <div style="font-weight:800;margin-bottom:6px;font-size:15px">🔑 تغيير كلمة مرور لوحة التحكم</div>
-      <p style="font-size:13px;color:var(--sub);margin-bottom:16px">استخدمها بدل كلمة المرور الحالية عند الدخول للإدارة</p>
-      <div class="fld"><label>كلمة المرور الحالية</label><input type="password" id="curPass" placeholder="● ● ● ● ● ●"></div>
-      <div class="fld"><label>كلمة المرور الجديدة</label><input type="password" id="newPass" placeholder="● ● ● ● ● ●"></div>
-      <div class="fld"><label>تأكيد كلمة المرور الجديدة</label><input type="password" id="newPass2" placeholder="● ● ● ● ● ●"></div>
-      <div id="passMsg"></div>
-      <button class="btn btn-solid" onclick="changeAdminPassword()">💾 حفظ كلمة المرور الجديدة</button>
     </div>`;
-}
-function changeAdminPassword(){
-  const cur = document.getElementById("curPass").value;
-  const n1 = document.getElementById("newPass").value;
-  const n2 = document.getElementById("newPass2").value;
-  const msgBox = document.getElementById("passMsg");
-  const currentPass = state.adminPass || ADMIN_PASS;
-  if (cur !== currentPass){
-    msgBox.innerHTML = `<div style="color:var(--red);font-size:13px;margin:6px 0">كلمة المرور الحالية غير صحيحة</div>`; return;
-  }
-  if (!n1 || n1.length < 4){
-    msgBox.innerHTML = `<div style="color:var(--red);font-size:13px;margin:6px 0">كلمة المرور الجديدة يجب أن تكون 4 أحرف/أرقام على الأقل</div>`; return;
-  }
-  if (n1 !== n2){
-    msgBox.innerHTML = `<div style="color:var(--red);font-size:13px;margin:6px 0">كلمة المرور الجديدة وتأكيدها غير متطابقين</div>`; return;
-  }
-  state.adminPass = n1;
-  saveState();
-  msgBox.innerHTML = `<div style="color:var(--green);font-size:13px;margin:6px 0">✅ تم تغيير كلمة المرور بنجاح</div>`;
-  document.getElementById("curPass").value = "";
-  document.getElementById("newPass").value = "";
-  document.getElementById("newPass2").value = "";
 }
 function setHue(deg){ state.hue=deg; saveState(); applyTheme(); render(); }
 function setBg(color){ state.bg=color; saveState(); applyTheme(); render(); }
@@ -1258,42 +1387,6 @@ function render(){
 }
 
 loadState(()=>{ render(); });
-
-/* ═══════════ تثبيت التطبيق (PWA) ═══════════ */
-let deferredInstallPrompt = null;
-function isStandalone(){
-  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-}
-function isIOS(){
-  return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
-}
-window.addEventListener("beforeinstallprompt", (e)=>{
-  e.preventDefault();
-  deferredInstallPrompt = e;
-  const btn = document.getElementById("installFloatBtn");
-  if(btn && !isStandalone()) btn.style.display = "flex";
-});
-window.addEventListener("appinstalled", ()=>{
-  const btn = document.getElementById("installFloatBtn");
-  if(btn) btn.style.display = "none";
-  deferredInstallPrompt = null;
-});
-function handleInstallClick(){
-  if(deferredInstallPrompt){
-    deferredInstallPrompt.prompt();
-    deferredInstallPrompt.userChoice.then(()=>{ deferredInstallPrompt = null; });
-  } else if(isIOS()){
-    document.getElementById("iosInstallModal").style.display = "flex";
-  }
-}
-if(!isStandalone() && isIOS()){
-  document.getElementById("installFloatBtn").style.display = "flex";
-}
-if("serviceWorker" in navigator){
-  window.addEventListener("load", ()=>{
-    navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
-  });
-}
 </script>
 </body>
 </html>
