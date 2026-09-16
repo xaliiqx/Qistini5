@@ -389,6 +389,8 @@ function pledgeBodyHtml(d){
     <div style="text-align:center;font-weight:900;font-size:18px;color:var(--sky1);margin-bottom:18px">تعهد خطي</div>
     <p class="cd-line">اني الموقع أدناه السيد/ة <span class="cd-blank">${esc(d.buyerName)}</span></p>
     <p class="cd-line">حامل رقم الهاتف <span class="cd-blank">${esc(d.buyerWa)}</span> والساكن في <span class="cd-blank">${esc(d.buyerAddress||"—")}</span></p>
+    <p class="cd-line">حامل رقم البطاقة الوطنية <span class="cd-blank">${esc(d.nationalId||"—")}</span></p>
+    <p class="cd-line">حامل رقم بطاقة السكن <span class="cd-blank">${esc(d.residenceId||"—")}</span></p>
     <p class="cd-line">أتعهد بموجب هذا التعهد الخطي بالالتزام التام بسداد قيمة السلعة المذكورة أدناه والمشتراة من شركة قسطني بنظام التقسيط، وذلك حسب الشروط التالية:</p>
     <div style="background:var(--skyBg);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13.5px;line-height:2">
       <div>السلعة المشتراة: <b>${esc(d.product)}</b></div>
@@ -414,6 +416,7 @@ function pledgeDocHtml(sub){
   const monthly = sub.months>0 ? Math.round((sub.total-(sub.downPayment||0))/sub.months) : 0;
   return pledgeBodyHtml({
     buyerName: sub.name, buyerWa: sub.wa, buyerAddress: sub.address||"",
+    nationalId: sub.nationalId||"", residenceId: sub.residenceId||"",
     product: sub.product||"—", total: sub.total||0, months: sub.months||0, monthly, currency: sub.currency,
     code: sub.code, date: todayISO()
   });
@@ -430,23 +433,48 @@ function openPrintWindow(title, bodyHtml){
       .cd-terms{margin:0;padding-inline-start:20px;font-size:13px;color:#4A6E88;line-height:2}
       .cd-sign{display:flex;justify-content:space-between;gap:20px;margin-top:30px}
       .cd-sign div{flex:1;text-align:center;padding-top:34px;border-top:1px solid #0B1E2D;font-size:12.5px;color:#4A6E88}
+      .ledger-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
+      .ledger-table th{background:#E5F2FA;padding:6px 4px;border:1px solid #C0DCF0;font-size:10.5px}
+      .ledger-table td{padding:6px 4px;border:1px solid #C0DCF0;text-align:center}
+      .print-page{page-break-after:always}
+      .print-page:last-child{page-break-after:auto}
+      .print-doc-title{text-align:center;font-weight:900;font-size:18px;color:#073B5C;margin-bottom:4px}
+      .print-doc-sub{text-align:center;font-size:12px;color:#4A6E88;margin-bottom:18px}
+      @media print{ .print-page{padding-top:10px} }
     </style></head><body>${bodyHtml}
     <script>window.onload=function(){window.print();}<\/script>
   </body></html>`);
   w.document.close();
 }
-function printPledgeSample(){
-  openPrintWindow("تعهد خطي — نموذج", pledgeBodyHtml({
-    buyerName:"[ اسم المشتري ]", buyerWa:"[ رقم الهاتف ]", buyerAddress:"[ العنوان ]",
-    product:"[ اسم السلعة ]", total:"[ المبلغ ]", months:"[ عدد الأشهر ]", monthly:"[ القسط الشهري ]",
-    code:"[ كود المشترك ]", date:"[     /     /2026     ]"
-  }));
+function getPledgeHtml(subId){
+  const sub = state.subs.find(s=>s.id===subId);
+  if(!sub) return "";
+  const el = document.getElementById("pledgeEdit-"+subId);
+  return el ? el.innerHTML : (sub.pledgeText || pledgeDocHtml(sub));
+}
+function getSanadHtml(subId){
+  const sub = state.subs.find(s=>s.id===subId);
+  if(!sub) return "";
+  const el = document.getElementById("sanadEdit-"+subId);
+  return el ? el.innerHTML : (sub.sanadText || sanadDocHtml(sub));
+}
+function printAll(subId){
+  const sub = state.subs.find(s=>s.id===subId);
+  if(!sub) return;
+  const docHead = (label) => `<div class="print-doc-title">قسطني</div><div class="print-doc-sub">${esc(label)} — ${esc(sub.name)} (${esc(sub.code)})</div>`;
+  const sections = [
+    { label: "عقد الشراء", html: contractDocHtml(sub) },
+    { label: "جدول التسديد", html: ledgerTableHtml(sub) },
+    { label: "التعهد الخطي", html: getPledgeHtml(subId) },
+    { label: "السند لأمر", html: getSanadHtml(subId) },
+  ];
+  const combined = sections.map(s => `<div class="print-page">${docHead(s.label)}${s.html}</div>`).join("");
+  openPrintWindow("ملف كامل — " + sub.name, combined);
 }
 function printPledge(subId){
   const sub = state.subs.find(s=>s.id===subId);
   if(!sub) return;
-  const el = document.getElementById("pledgeEdit-"+subId);
-  const html = el ? el.innerHTML : (sub.pledgeText || pledgeDocHtml(sub));
+  const html = getPledgeHtml(subId);
   openPrintWindow("تعهد خطي — " + sub.name, html);
 }
 
@@ -481,19 +509,10 @@ function sanadDocHtml(sub){
     guarantorName: sub.guarantorName||GUARANTOR_NAME, guarantorPhone: sub.guarantorPhone||""
   });
 }
-function printSanadSample(){
-  openPrintWindow("سند لأمر — نموذج", sanadBodyHtml({
-    sanadNo:"[      ]", buyerName:"[ اسم المدين / المشتري ]", buyerWa:"[ رقم الهاتف ]",
-    product:"[ اسم السلعة ]", total:"[ المبلغ ]", code:"[      ]",
-    dueDate:"[     /     / 2026     ]", date:"[     /     / 2026     ]",
-    guarantorName:"[ اسم الكفيل ]", guarantorPhone:"[ رقم هاتف الكفيل ]"
-  }));
-}
 function printSanad(subId){
   const sub = state.subs.find(s=>s.id===subId);
   if(!sub) return;
-  const el = document.getElementById("sanadEdit-"+subId);
-  const html = el ? el.innerHTML : (sub.sanadText || sanadDocHtml(sub));
+  const html = getSanadHtml(subId);
   openPrintWindow("سند لأمر — " + sub.name, html);
 }
 function saveEditableDoc(subId, field, el){
@@ -579,6 +598,14 @@ function printLedger(subId){
   const head = `<div style="text-align:center;font-weight:900;font-size:18px;color:#073B5C;margin-bottom:4px">قسطني</div>
     <div style="text-align:center;font-size:12px;color:#4A6E88;margin-bottom:18px">${esc(title)} — كود ${esc(sub.code)}</div>`;
   openPrintWindow(title, head + ledgerTableHtml(sub));
+}
+function printContract(subId){
+  const sub = state.subs.find(s=>s.id===subId);
+  if(!sub) return;
+  const title = `عقد الشراء — ${sub.name}`;
+  const head = `<div style="text-align:center;font-weight:900;font-size:18px;color:#073B5C;margin-bottom:4px">قسطني</div>
+    <div style="text-align:center;font-size:12px;color:#4A6E88;margin-bottom:18px">${esc(title)} — كود ${esc(sub.code)}</div>`;
+  openPrintWindow(title, head + contractDocHtml(sub));
 }
 function sendLedgerWhatsApp(subId){
   const sub = state.subs.find(s=>s.id===subId);
@@ -1099,7 +1126,10 @@ function renderAContract(){
   return `
     <div style="display:grid;gap:16px">
       <div class="card">
-        <div style="font-weight:800;margin-bottom:14px;font-size:15px">📄 عقد الشراء وجدول التسديد لكل مشترك</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+          <div style="font-weight:800;font-size:15px">📄 عقد الشراء وجدول التسديد لكل مشترك</div>
+          ${sub ? `<button class="btn btn-solid sm" onclick="printAll('${sub.id}')">🖨 طباعة الكل (عقد + جدول + تعهد + سند)</button>` : ""}
+        </div>
         <div class="fld"><label>اختر المشترك</label><select onchange="contractSelSubId=this.value;render()">
           <option value="">— اختر مشترك —</option>
           ${state.subs.map(s=>`<option value="${s.id}" ${contractSelSubId===s.id?'selected':''}>${esc(s.name)} — ${esc(s.code)}</option>`).join("")}
@@ -1119,6 +1149,8 @@ function renderAContract(){
           <div class="fld"><label>تاريخ أول قسط</label><input type="date" id="cdStart" value="${sub.startDate||''}"></div>
           <div class="fld"><label>اسم الكفيل</label><input type="text" id="cdGuarantorName" value="${esc(sub.guarantorName||GUARANTOR_NAME)}"></div>
           <div class="fld"><label>هاتف الكفيل (اختياري)</label><input type="text" id="cdGuarantorPhone" value="${esc(sub.guarantorPhone||'')}"></div>
+          <div class="fld"><label>رقم البطاقة الوطنية (اختياري)</label><input type="text" id="cdNationalId" value="${esc(sub.nationalId||'')}"></div>
+          <div class="fld"><label>رقم بطاقة السكن (اختياري)</label><input type="text" id="cdResidenceId" value="${esc(sub.residenceId||'')}"></div>
         </div>
         <div class="fld"><label>ملاحظات (اختياري)</label><textarea id="cdNotes" rows="2">${esc(sub.notes||'')}</textarea></div>
         <button class="btn btn-solid" onclick="saveSubContract()">💾 حفظ بيانات العقد</button>
@@ -1136,7 +1168,7 @@ function renderAContract(){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px" class="no-print">
           <div style="font-weight:800;font-size:15px">📃 عقد الشراء المُعبّأ وجدول التسديد</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-outline sm" onclick="window.print()">🖨 طباعة العقد</button>
+            <button class="btn btn-outline sm" onclick="printContract('${sub.id}')">🖨 طباعة العقد فقط</button>
             <button class="btn btn-outline sm" onclick="printLedger('${sub.id}')">🖨 طباعة الجدول فقط</button>
             <button class="btn btn-wa sm" onclick="sendLedgerWhatsApp('${sub.id}')">📤 إرسال الجدول للمشترك</button>
           </div>
@@ -1172,6 +1204,8 @@ function saveSubContract(){
   sub.startDate = document.getElementById("cdStart").value;
   sub.guarantorName = document.getElementById("cdGuarantorName").value.trim() || GUARANTOR_NAME;
   sub.guarantorPhone = document.getElementById("cdGuarantorPhone").value.trim();
+  sub.nationalId = document.getElementById("cdNationalId").value.trim();
+  sub.residenceId = document.getElementById("cdResidenceId").value.trim();
   sub.notes = document.getElementById("cdNotes").value.trim();
   saveState(); render();
 }
