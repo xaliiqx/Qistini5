@@ -273,7 +273,7 @@ let state = {
   financing: [
     {id:"f1", name:"علي حسين جواد", wa:"07712345678", item:"غسالة سامسونج 9 كغم", price:620000, loc:"بغداد - الكرادة", status:"pending", reason:""},
   ],
-  info: { name:"شركة قسطني للتسويق والتقسيط", about:"قسطني متخصصة ببيع الأجهزة المنزلية والإلكترونيات نقداً وبالتقسيط المريح.", address:"بغداد - شارع فلسطين", mastercard:"8483533967" },
+  info: { name:"شركة قسطني للتسويق والتقسيط", ownerName:"علي محسن جبير", about:"قسطني متخصصة ببيع الأجهزة المنزلية والإلكترونيات نقداً وبالتقسيط المريح.", address:"بغداد - شارع فلسطين", mastercard:"8483533967" },
   hue: 0,
   bg: "#E5F2FA",
 };
@@ -386,12 +386,13 @@ function contractDocHtml(sub){
 /* ─── التعهد الخطي القابل للطباعة ─── */
 function pledgeBodyHtml(d){
   return `
-    <div style="text-align:center;font-weight:900;font-size:18px;color:var(--sky1);margin-bottom:18px">تعهد خطي</div>
+    <div style="text-align:center;font-weight:900;font-size:18px;color:var(--sky1);margin-bottom:2px">تعهد خطي</div>
+    ${d.ownerName?`<div style="text-align:center;font-size:11px;color:var(--sub);margin-bottom:16px">قسطني — صاحب المشروع: ${esc(d.ownerName)}</div>`:'<div style="margin-bottom:16px"></div>'}
     <p class="cd-line">اني الموقع أدناه السيد/ة <span class="cd-blank">${esc(d.buyerName)}</span></p>
     <p class="cd-line">حامل رقم الهاتف <span class="cd-blank">${esc(d.buyerWa)}</span> والساكن في <span class="cd-blank">${esc(d.buyerAddress||"—")}</span></p>
     <p class="cd-line">حامل رقم البطاقة الوطنية <span class="cd-blank">${esc(d.nationalId||"—")}</span></p>
     <p class="cd-line">حامل رقم بطاقة السكن <span class="cd-blank">${esc(d.residenceId||"—")}</span></p>
-    <p class="cd-line">أتعهد بموجب هذا التعهد الخطي بالالتزام التام بسداد قيمة السلعة المذكورة أدناه والمشتراة من شركة قسطني بنظام التقسيط، وذلك حسب الشروط التالية:</p>
+    <p class="cd-line">أتعهد بموجب هذا التعهد الخطي بالالتزام التام بسداد قيمة السلعة المذكورة أدناه والمشتراة من <b>${esc(d.ownerName||"صاحب المشروع")}</b> (يعمل تحت اسم قسطني للتسويق والتقسيط) بنظام التقسيط، وذلك حسب الشروط التالية:</p>
     <div style="background:var(--skyBg);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13.5px;line-height:2">
       <div>السلعة المشتراة: <b>${esc(d.product)}</b></div>
       <div>إجمالي مبلغ القسط: <b>${typeof d.total==="number"?fmt(d.total):esc(d.total)}</b></div>
@@ -410,6 +411,10 @@ function pledgeBodyHtml(d){
     <div class="cd-sign">
       <div>التاريخ<br>${esc(d.date)}</div>
       <div>اسم المتعهد والتوقيع<br>${esc(d.buyerName)}</div>
+      <div style="border-top:none;padding-top:0">
+        <div style="width:56px;height:56px;border:1.5px dashed var(--sub);border-radius:50%;margin:0 auto 6px"></div>
+        بصمة الإبهام
+      </div>
     </div>`;
 }
 function pledgeDocHtml(sub){
@@ -418,7 +423,7 @@ function pledgeDocHtml(sub){
     buyerName: sub.name, buyerWa: sub.wa, buyerAddress: sub.address||"",
     nationalId: sub.nationalId||"", residenceId: sub.residenceId||"",
     product: sub.product||"—", total: sub.total||0, months: sub.months||0, monthly, currency: sub.currency,
-    code: sub.code, date: todayISO()
+    code: sub.code, date: todayISO(), ownerName: state.info.ownerName||""
   });
 }
 function openPrintWindow(title, bodyHtml){
@@ -480,13 +485,14 @@ function printPledge(subId){
 
 /* ─── السند لأمر (كمبيالة) القابل للطباعة ─── */
 function sanadBodyHtml(d){
+  const ownerLine = d.ownerName ? `<b>${esc(d.ownerName)}</b> (يعمل تحت اسم قسطني للتسويق والتقسيط)` : `<b>قسطني للتسويق والتقسيط</b>`;
   return `
     <div style="text-align:center;font-weight:900;font-size:18px;color:var(--sky1);margin-bottom:6px">سند لأمر (كمبيالة)</div>
-    <div style="text-align:center;font-size:11px;color:var(--sub);margin-bottom:16px">Promissory Note</div>
+    <div style="text-align:center;font-size:11px;color:var(--sub);margin-bottom:16px">Promissory Note${d.ownerName?` — صاحب المشروع: ${esc(d.ownerName)}`:""}</div>
     <p class="cd-line">رقم السند: <span class="cd-blank">${esc(d.sanadNo||"—")}</span> &nbsp;&nbsp; تاريخ التحرير: <span class="cd-blank">${esc(d.date)}</span></p>
     <p class="cd-line">المبلغ: <span class="cd-blank">${typeof d.total==="number"?fmt(d.total):esc(d.total)}</span></p>
-    <p class="cd-line">بموجب هذا السند، أتعهد أنا الموقّع أدناه السيد/ة <span class="cd-blank">${esc(d.buyerName)}</span> بأن أدفع لأمر شركة <b>قسطني للتسويق والتقسيط</b> أو لمن يحمل هذا السند بصفة قانونية، وبدون قيد أو شرط، مبلغاً وقدره <span class="cd-blank">${typeof d.total==="number"?fmt(d.total):esc(d.total)}</span> لا غير.</p>
-    <p class="cd-line">وذلك استحقاقاً بتاريخ <span class="cd-blank">${esc(d.dueDate||"—")}</span>، وهذا المبلغ يمثل باقي قيمة الأقساط المستحقة عن السلعة المبينة أدناه، والمشتراة من شركة قسطني بنظام البيع بالتقسيط، ويحل هذا السند محل كافة الأقساط المتبقية عند التوقف عن السداد أو الإخلال بشروط عقد الشراء بالتقسيط الموقّع بين الطرفين.</p>
+    <p class="cd-line">بموجب هذا السند، أتعهد أنا الموقّع أدناه السيد/ة <span class="cd-blank">${esc(d.buyerName)}</span> بأن أدفع لأمر ${ownerLine} أو لمن يحمل هذا السند بصفة قانونية، وبدون قيد أو شرط، مبلغاً وقدره <span class="cd-blank">${typeof d.total==="number"?fmt(d.total):esc(d.total)}</span> لا غير.</p>
+    <p class="cd-line">وذلك استحقاقاً بتاريخ <span class="cd-blank">${esc(d.dueDate||"—")}</span>، وهذا المبلغ يمثل باقي قيمة الأقساط المستحقة عن السلعة المبينة أدناه، والمشتراة بنظام البيع بالتقسيط، ويحل هذا السند محل كافة الأقساط المتبقية عند التوقف عن السداد أو الإخلال بشروط عقد الشراء بالتقسيط الموقّع بين الطرفين.</p>
     <div style="background:var(--skyBg);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13.5px;line-height:2">
       <div>السلعة: <b>${esc(d.product)}</b></div>
       <div>كود المشترك: <b>${esc(d.code)}</b></div>
@@ -496,8 +502,12 @@ function sanadBodyHtml(d){
     <p class="cd-line" style="margin-top:10px">ويقر الموقّع أدناه بأن هذا السند صحيح ونافذ اعتباراً من تاريخه، وأنه غير قابل للطعن أو الاعتراض، وأنه على علم تام بالمسؤولية القانونية المترتبة على عدم الوفاء بقيمته في تاريخ الاستحقاق المحدد أعلاه، ويحق لحامل السند اتخاذ كافة الإجراءات القانونية والتنفيذية بحقه وبحق الكفيل الضامن.</p>
     <div class="cd-sign">
       <div>توقيع المدين (المشتري)<br>${esc(d.buyerName)}</div>
+      <div style="border-top:none;padding-top:0">
+        <div style="width:56px;height:56px;border:1.5px dashed var(--sub);border-radius:50%;margin:0 auto 6px"></div>
+        بصمة إبهام المدين
+      </div>
       <div>توقيع الكفيل<br>${esc(d.guarantorName||"—")}</div>
-      <div>توقيع ممثل الشركة</div>
+      <div>توقيع ${d.ownerName?esc(d.ownerName):"ممثل الشركة"}</div>
     </div>
     <p style="text-align:center;font-size:11px;color:var(--orange);margin-top:16px">ملاحظة: لضمان أقصى قوة قانونية وتنفيذية لهذا السند، يُفضّل تصديقه أمام كاتب العدل المختص.</p>`;
 }
@@ -506,7 +516,8 @@ function sanadDocHtml(sub){
     sanadNo: sub.code, buyerName: sub.name, buyerWa: sub.wa,
     product: sub.product||"—", total: sub.total-(sub.paid||0), code: sub.code, currency: sub.currency,
     dueDate: sub.next?fmtDateAr(sub.next):"—", date: todayISO(),
-    guarantorName: sub.guarantorName||GUARANTOR_NAME, guarantorPhone: sub.guarantorPhone||""
+    guarantorName: sub.guarantorName||GUARANTOR_NAME, guarantorPhone: sub.guarantorPhone||"",
+    ownerName: state.info.ownerName||""
   });
 }
 function printSanad(subId){
@@ -1368,6 +1379,7 @@ function renderAInfo(){
     <div class="card">
       <div style="font-weight:800;margin-bottom:14px;font-size:15px">🏢 معلومات الشركة</div>
       <div class="fld"><label>اسم الشركة</label><input type="text" id="infoName" value="${esc(state.info.name)}" onchange="state.info.name=this.value;saveState();renderChrome()"></div>
+      <div class="fld"><label>اسم صاحب المشروع (يظهر فقط بالتعهد الخطي وسند لأمر)</label><input type="text" id="infoOwner" value="${esc(state.info.ownerName||'')}" onchange="state.info.ownerName=this.value;saveState();renderChrome()"></div>
       <div class="fld"><label>نبذة عن الشركة</label><textarea id="infoAbout" rows="4" onchange="state.info.about=this.value;saveState()">${esc(state.info.about)}</textarea></div>
       <div class="fld"><label>العنوان</label><input type="text" id="infoAddr" value="${esc(state.info.address)}" onchange="state.info.address=this.value;saveState()"></div>
       <div style="margin-top:8px;padding:12px 16px;background:#073B5C10;border-radius:11px;border:1px solid #073B5C22">
