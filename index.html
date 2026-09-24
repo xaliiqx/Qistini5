@@ -133,7 +133,9 @@ footer{background:var(--sky1);color:#fff;padding:26px 20px;text-align:center;mar
 .cd-sign div{flex:1;min-width:140px;text-align:center;padding-top:30px;border-top:1px solid var(--text);font-size:12.5px;color:var(--sub)}
 .cd-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--skyBg)}
 .contract-paper{background:#FEFDF9;border:1.5px dashed var(--border);border-radius:12px;padding:20px;transition:border-color .15s}
-.contract-paper:focus{outline:none;border-color:var(--sky3);border-style:solid}
+.editable-field{display:inline-block;min-width:24px;background:#FFF3C4;border-bottom:1.5px dashed #C89416;border-radius:3px;padding:0 4px;cursor:text;transition:background .15s}
+.editable-field:hover{background:#FFE9A0}
+.editable-field:focus{outline:none;background:#FFF7DC;border-bottom-color:var(--sky3)}
 .doc-upload-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media (max-width:520px){.doc-upload-grid{grid-template-columns:1fr}}
 .doc-upload-item{border:1.5px dashed var(--border);border-radius:12px;padding:10px;background:var(--skyBg)}
@@ -362,7 +364,7 @@ function contractDocHtml(sub){
     <p class="cd-line">بكفالة من السيد <span class="cd-blank">${esc(guarantorName)}</span></p>
     <p class="cd-line">وكان سعره نقداً <span class="cd-blank">${sub.cashPrice?fmt(sub.cashPrice, sub.currency):"—"}</span></p>
     <p class="cd-line">وقبلت شراءه بمبلغ <span class="cd-blank">${fmt(sub.total)}</span> قسطاً</p>
-    <p class="cd-line">بمقدمة <span class="cd-blank">${fmt(sub.downPayment||0)}</span> والباقي <span class="cd-blank">${sub.months||0}</span> قسطاً</p>
+    <p class="cd-line">بمقدمة <span class="cd-blank">${fmt(sub.downPayment||0)}</span> والباقي <span class="cd-blank">${fmt(Math.max(0,(sub.total||0)-(sub.downPayment||0)))}</span> قسطاً</p>
     <p class="cd-line">بمقدار <span class="cd-blank">${fmt(monthly)}</span> لكل شهر لمدة <span class="cd-blank">${sub.months||0}</span> شهر</p>
     <p class="cd-line">حيث يبدأ دفع القسط الاول بتاريخ <span class="cd-blank">${sub.startDate?fmtDateAr(sub.startDate):"—"}</span></p>
     <p class="cd-line">وينتهي بتاريخ <span class="cd-blank">${endDate?fmtDateAr(endDate):"—"}</span></p>
@@ -385,19 +387,20 @@ function contractDocHtml(sub){
 
 /* ─── التعهد الخطي القابل للطباعة ─── */
 function pledgeBodyHtml(d){
+  const ef = (val) => `<span class="editable-field" contenteditable="true">${esc(val)}</span>`;
   return `
     <div style="text-align:center;font-weight:900;font-size:18px;color:var(--sky1);margin-bottom:2px">تعهد خطي</div>
     ${d.ownerName?`<div style="text-align:center;font-size:11px;color:var(--sub);margin-bottom:16px">قسطني — صاحب المشروع: ${esc(d.ownerName)}</div>`:'<div style="margin-bottom:16px"></div>'}
-    <p class="cd-line">اني الموقع أدناه السيد/ة <span class="cd-blank">${esc(d.buyerName)}</span></p>
-    <p class="cd-line">حامل رقم الهاتف <span class="cd-blank">${esc(d.buyerWa)}</span> والساكن في <span class="cd-blank">${esc(d.buyerAddress||"—")}</span></p>
-    <p class="cd-line">حامل رقم البطاقة الوطنية <span class="cd-blank">${esc(d.nationalId||"—")}</span></p>
-    <p class="cd-line">حامل رقم بطاقة السكن <span class="cd-blank">${esc(d.residenceId||"—")}</span></p>
+    <p class="cd-line">اني الموقع أدناه السيد/ة <span class="cd-blank">${ef(d.buyerName)}</span></p>
+    <p class="cd-line">حامل رقم الهاتف <span class="cd-blank">${ef(d.buyerWa)}</span> والساكن في <span class="cd-blank">${ef(d.buyerAddress||"—")}</span></p>
+    <p class="cd-line">حامل رقم البطاقة الوطنية <span class="cd-blank">${ef(d.nationalId||"—")}</span></p>
+    <p class="cd-line">حامل رقم بطاقة السكن <span class="cd-blank">${ef(d.residenceId||"—")}</span></p>
     <p class="cd-line">أتعهد بموجب هذا التعهد الخطي بالالتزام التام بسداد قيمة السلعة المذكورة أدناه والمشتراة من <b>${esc(d.ownerName||"صاحب المشروع")}</b> (يعمل تحت اسم قسطني للتسويق والتقسيط) بنظام التقسيط، وذلك حسب الشروط التالية:</p>
     <div style="background:var(--skyBg);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13.5px;line-height:2">
-      <div>السلعة المشتراة: <b>${esc(d.product)}</b></div>
-      <div>إجمالي مبلغ القسط: <b>${typeof d.total==="number"?fmt(d.total):esc(d.total)}</b></div>
-      <div>عدد الأشهر: <b>${esc(d.months)}</b> — القسط الشهري: <b>${typeof d.monthly==="number"?fmt(d.monthly):esc(d.monthly)}</b></div>
-      <div>كود المشترك: <b>${esc(d.code)}</b></div>
+      <div>السلعة المشتراة: <b>${ef(d.product)}</b></div>
+      <div>إجمالي مبلغ القسط: <b>${ef(typeof d.total==="number"?fmt(d.total):d.total)}</b></div>
+      <div>عدد الأشهر: <b>${ef(d.months)}</b> — القسط الشهري: <b>${ef(typeof d.monthly==="number"?fmt(d.monthly):d.monthly)}</b></div>
+      <div>كود المشترك: <b>${ef(d.code)}</b></div>
     </div>
     <p class="cd-line">وأتعهد بما يلي:</p>
     <ul class="cd-terms">
@@ -409,8 +412,8 @@ function pledgeBodyHtml(d){
     </ul>
     <p class="cd-line" style="margin-top:10px">وهذا إقرار وتعهد مني بذلك، وقد وقعت عليه بكامل إرادتي واختياري دون أي إكراه.</p>
     <div class="cd-sign">
-      <div>التاريخ<br>${esc(d.date)}</div>
-      <div>اسم المتعهد والتوقيع<br>${esc(d.buyerName)}</div>
+      <div>التاريخ<br>${ef(d.date)}</div>
+      <div>اسم المتعهد والتوقيع<br>${ef(d.buyerName)}</div>
       <div style="border-top:none;padding-top:0">
         <div style="width:56px;height:56px;border:1.5px dashed var(--sub);border-radius:50%;margin:0 auto 6px"></div>
         بصمة الإبهام
@@ -463,6 +466,23 @@ function getSanadHtml(subId){
   const el = document.getElementById("sanadEdit-"+subId);
   return el ? el.innerHTML : (sub.sanadText || sanadDocHtml(sub));
 }
+function docsPrintHtml(sub){
+  const items = [
+    { label: "البطاقة الوطنية — الوجه", img: sub.idFrontImage },
+    { label: "البطاقة الوطنية — الظهر", img: sub.idBackImage },
+    { label: "بطاقة السكن — الوجه", img: sub.resFrontImage },
+    { label: "بطاقة السكن — الظهر", img: sub.resBackImage },
+  ];
+  const any = items.some(it => it.img);
+  if(!any) return `<p style="text-align:center;color:#4A6E88;padding:30px 0">لا توجد مستمسكات مرفوعة لهذا المشترك بعد.</p>`;
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    ${items.map(it => it.img ? `
+      <div style="text-align:center">
+        <img src="${it.img}" style="width:100%;max-height:260px;object-fit:contain;border:1px solid #C0DCF0;border-radius:8px;margin-bottom:6px">
+        <div style="font-size:12px;color:#4A6E88">${esc(it.label)}</div>
+      </div>` : "").join("")}
+  </div>`;
+}
 function printAll(subId){
   const sub = state.subs.find(s=>s.id===subId);
   if(!sub) return;
@@ -472,6 +492,7 @@ function printAll(subId){
     { label: "جدول التسديد", html: ledgerTableHtml(sub) },
     { label: "التعهد الخطي", html: getPledgeHtml(subId) },
     { label: "السند لأمر", html: getSanadHtml(subId) },
+    { label: "مستمسكات العميل", html: docsPrintHtml(sub) },
   ];
   const combined = sections.map(s => `<div class="print-page">${docHead(s.label)}${s.html}</div>`).join("");
   openPrintWindow("ملف كامل — " + sub.name, combined);
@@ -485,28 +506,29 @@ function printPledge(subId){
 
 /* ─── السند لأمر (كمبيالة) القابل للطباعة ─── */
 function sanadBodyHtml(d){
+  const ef = (val) => `<span class="editable-field" contenteditable="true">${esc(val)}</span>`;
   const ownerLine = d.ownerName ? `<b>${esc(d.ownerName)}</b> (يعمل تحت اسم قسطني للتسويق والتقسيط)` : `<b>قسطني للتسويق والتقسيط</b>`;
   return `
     <div style="text-align:center;font-weight:900;font-size:18px;color:var(--sky1);margin-bottom:6px">سند لأمر (كمبيالة)</div>
     <div style="text-align:center;font-size:11px;color:var(--sub);margin-bottom:16px">Promissory Note${d.ownerName?` — صاحب المشروع: ${esc(d.ownerName)}`:""}</div>
-    <p class="cd-line">رقم السند: <span class="cd-blank">${esc(d.sanadNo||"—")}</span> &nbsp;&nbsp; تاريخ التحرير: <span class="cd-blank">${esc(d.date)}</span></p>
-    <p class="cd-line">المبلغ: <span class="cd-blank">${typeof d.total==="number"?fmt(d.total):esc(d.total)}</span></p>
-    <p class="cd-line">بموجب هذا السند، أتعهد أنا الموقّع أدناه السيد/ة <span class="cd-blank">${esc(d.buyerName)}</span> بأن أدفع لأمر ${ownerLine} أو لمن يحمل هذا السند بصفة قانونية، وبدون قيد أو شرط، مبلغاً وقدره <span class="cd-blank">${typeof d.total==="number"?fmt(d.total):esc(d.total)}</span> لا غير.</p>
-    <p class="cd-line">وذلك استحقاقاً بتاريخ <span class="cd-blank">${esc(d.dueDate||"—")}</span>، وهذا المبلغ يمثل باقي قيمة الأقساط المستحقة عن السلعة المبينة أدناه، والمشتراة بنظام البيع بالتقسيط، ويحل هذا السند محل كافة الأقساط المتبقية عند التوقف عن السداد أو الإخلال بشروط عقد الشراء بالتقسيط الموقّع بين الطرفين.</p>
+    <p class="cd-line">رقم السند: <span class="cd-blank">${ef(d.sanadNo||"—")}</span> &nbsp;&nbsp; تاريخ التحرير: <span class="cd-blank">${ef(d.date)}</span></p>
+    <p class="cd-line">المبلغ: <span class="cd-blank">${ef(typeof d.total==="number"?fmt(d.total):d.total)}</span></p>
+    <p class="cd-line">بموجب هذا السند، أتعهد أنا الموقّع أدناه السيد/ة <span class="cd-blank">${ef(d.buyerName)}</span> بأن أدفع لأمر ${ownerLine} أو لمن يحمل هذا السند بصفة قانونية، وبدون قيد أو شرط، مبلغاً وقدره <span class="cd-blank">${ef(typeof d.total==="number"?fmt(d.total):d.total)}</span> لا غير.</p>
+    <p class="cd-line">وذلك استحقاقاً بتاريخ <span class="cd-blank">${ef(d.dueDate||"—")}</span>، وهذا المبلغ يمثل باقي قيمة الأقساط المستحقة عن السلعة المبينة أدناه، والمشتراة بنظام البيع بالتقسيط، ويحل هذا السند محل كافة الأقساط المتبقية عند التوقف عن السداد أو الإخلال بشروط عقد الشراء بالتقسيط الموقّع بين الطرفين.</p>
     <div style="background:var(--skyBg);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13.5px;line-height:2">
-      <div>السلعة: <b>${esc(d.product)}</b></div>
-      <div>كود المشترك: <b>${esc(d.code)}</b></div>
-      <div>رقم هاتف المدين: <b>${esc(d.buyerWa)}</b></div>
+      <div>السلعة: <b>${ef(d.product)}</b></div>
+      <div>كود المشترك: <b>${ef(d.code)}</b></div>
+      <div>رقم هاتف المدين: <b>${ef(d.buyerWa)}</b></div>
     </div>
-    <p class="cd-line">الكفيل الضامن لهذا السند: <span class="cd-blank">${esc(d.guarantorName||"—")}</span> — هاتف الكفيل: <span class="cd-blank">${esc(d.guarantorPhone||"—")}</span></p>
+    <p class="cd-line">الكفيل الضامن لهذا السند: <span class="cd-blank">${ef(d.guarantorName||"—")}</span> — هاتف الكفيل: <span class="cd-blank">${ef(d.guarantorPhone||"—")}</span></p>
     <p class="cd-line" style="margin-top:10px">ويقر الموقّع أدناه بأن هذا السند صحيح ونافذ اعتباراً من تاريخه، وأنه غير قابل للطعن أو الاعتراض، وأنه على علم تام بالمسؤولية القانونية المترتبة على عدم الوفاء بقيمته في تاريخ الاستحقاق المحدد أعلاه، ويحق لحامل السند اتخاذ كافة الإجراءات القانونية والتنفيذية بحقه وبحق الكفيل الضامن.</p>
     <div class="cd-sign">
-      <div>توقيع المدين (المشتري)<br>${esc(d.buyerName)}</div>
+      <div>توقيع المدين (المشتري)<br>${ef(d.buyerName)}</div>
       <div style="border-top:none;padding-top:0">
         <div style="width:56px;height:56px;border:1.5px dashed var(--sub);border-radius:50%;margin:0 auto 6px"></div>
         بصمة إبهام المدين
       </div>
-      <div>توقيع الكفيل<br>${esc(d.guarantorName||"—")}</div>
+      <div>توقيع الكفيل<br>${ef(d.guarantorName||"—")}</div>
       <div>توقيع ${d.ownerName?esc(d.ownerName):"ممثل الشركة"}</div>
     </div>
     <p style="text-align:center;font-size:11px;color:var(--orange);margin-top:16px">ملاحظة: لضمان أقصى قوة قانونية وتنفيذية لهذا السند، يُفضّل تصديقه أمام كاتب العدل المختص.</p>`;
@@ -1139,7 +1161,7 @@ function renderAContract(){
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
           <div style="font-weight:800;font-size:15px">📄 عقد الشراء وجدول التسديد لكل مشترك</div>
-          ${sub ? `<button class="btn btn-solid sm" onclick="printAll('${sub.id}')">🖨 طباعة الكل (عقد + جدول + تعهد + سند)</button>` : ""}
+          ${sub ? `<button class="btn btn-solid sm" onclick="printAll('${sub.id}')">🖨 طباعة الكل (عقد + جدول + تعهد + سند + مستمسكات)</button>` : ""}
         </div>
         <div class="fld"><label>اختر المشترك</label><select onchange="contractSelSubId=this.value;render()">
           <option value="">— اختر مشترك —</option>
@@ -1192,16 +1214,16 @@ function renderAContract(){
           <div style="font-weight:800;font-size:15px">📝 التعهد الخطي</div>
           <button class="btn btn-outline sm" onclick="printPledge('${sub.id}')">🖨 طباعة التعهد</button>
         </div>
-        <div style="font-size:12px;color:var(--sub);margin-bottom:10px">تعهد خطي معبّأ ببيانات هذا المشترك تلقائياً — اضغط داخل النص وعدّله كيفما تريد، التعديلات تُحفظ تلقائياً، ثم اضغط الزر لطباعته.</div>
-        <div id="pledgeEdit-${sub.id}" class="contract-paper" contenteditable="true" onblur="saveEditableDoc('${sub.id}','pledgeText',this)">${sub.pledgeText || pledgeDocHtml(sub)}</div>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:10px">تعهد خطي معبّأ ببيانات هذا المشترك تلقائياً — الحقول المُظلّلة 🟡 فقط قابلة للتعديل (اضغط عليها وعدّلها)، وبقية نص العقد ثابتة قانونياً. التعديلات تُحفظ تلقائياً.</div>
+        <div id="pledgeEdit-${sub.id}" class="contract-paper" onfocusout="saveEditableDoc('${sub.id}','pledgeText',this)">${sub.pledgeText || pledgeDocHtml(sub)}</div>
       </div>
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <div style="font-weight:800;font-size:15px">📜 السند لأمر (كمبيالة)</div>
           <button class="btn btn-outline sm" onclick="printSanad('${sub.id}')">🖨 طباعة السند</button>
         </div>
-        <div style="font-size:12px;color:var(--sub);margin-bottom:10px">سند لأمر معبّأ ببيانات هذا المشترك — قابل للتعديل مباشرة قبل الطباعة (يُفضّل تصديقه لاحقاً أمام كاتب العدل).</div>
-        <div id="sanadEdit-${sub.id}" class="contract-paper" contenteditable="true" onblur="saveEditableDoc('${sub.id}','sanadText',this)">${sub.sanadText || sanadDocHtml(sub)}</div>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:10px">سند لأمر معبّأ ببيانات هذا المشترك — الحقول المُظلّلة 🟡 فقط قابلة للتعديل، وبقية نص السند ثابتة (يُفضّل تصديقه لاحقاً أمام كاتب العدل).</div>
+        <div id="sanadEdit-${sub.id}" class="contract-paper" onfocusout="saveEditableDoc('${sub.id}','sanadText',this)">${sub.sanadText || sanadDocHtml(sub)}</div>
       </div>`}
     </div>`;
 }
