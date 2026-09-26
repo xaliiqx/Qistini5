@@ -395,7 +395,7 @@ function pledgeBodyHtml(d){
     <p class="cd-line">حامل رقم الهاتف <span class="cd-blank">${ef(d.buyerWa)}</span> والساكن في <span class="cd-blank">${ef(d.buyerAddress||"—")}</span></p>
     <p class="cd-line">حامل رقم البطاقة الوطنية <span class="cd-blank">${ef(d.nationalId||"—")}</span></p>
     <p class="cd-line">حامل رقم بطاقة السكن <span class="cd-blank">${ef(d.residenceId||"—")}</span></p>
-    <p class="cd-line">أتعهد بموجب هذا التعهد الخطي بالالتزام التام بسداد قيمة السلعة المذكورة أدناه والمشتراة من <b>${esc(d.ownerName||"صاحب المشروع")}</b> (يعمل تحت اسم قسطني للتسويق والتقسيط) بنظام التقسيط، وذلك حسب الشروط التالية:</p>
+    <p class="cd-line">أتعهد بموجب هذا التعهد الخطي بالالتزام التام بسداد قيمة السلعة المذكورة أدناه والمشتراة من <b class="cd-blank">${ef(d.ownerName||"صاحب المشروع")}</b> (يعمل تحت اسم قسطني للتسويق والتقسيط) بنظام التقسيط، وذلك حسب الشروط التالية:</p>
     <div style="background:var(--skyBg);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13.5px;line-height:2">
       <div>السلعة المشتراة: <b>${ef(d.product)}</b></div>
       <div>إجمالي مبلغ القسط: <b>${ef(typeof d.total==="number"?fmt(d.total):d.total)}</b></div>
@@ -507,7 +507,7 @@ function printPledge(subId){
 /* ─── السند لأمر (كمبيالة) القابل للطباعة ─── */
 function sanadBodyHtml(d){
   const ef = (val) => `<span class="editable-field" contenteditable="true">${esc(val)}</span>`;
-  const ownerLine = d.ownerName ? `<b>${esc(d.ownerName)}</b> (يعمل تحت اسم قسطني للتسويق والتقسيط)` : `<b>قسطني للتسويق والتقسيط</b>`;
+  const ownerLine = d.ownerName ? `<b class="cd-blank">${ef(d.ownerName)}</b> (يعمل تحت اسم قسطني للتسويق والتقسيط)` : `<b class="cd-blank">${ef("قسطني للتسويق والتقسيط")}</b>`;
   return `
     <div style="text-align:center;font-weight:900;font-size:18px;color:var(--sky1);margin-bottom:6px">سند لأمر (كمبيالة)</div>
     <div style="text-align:center;font-size:11px;color:var(--sub);margin-bottom:16px">Promissory Note${d.ownerName?` — صاحب المشروع: ${esc(d.ownerName)}`:""}</div>
